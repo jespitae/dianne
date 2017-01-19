@@ -1,0 +1,1083 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f1b2db771ad, pid=7909, tid=0x00007f1c1f09f700
+#
+# JRE version: OpenJDK Runtime Environment (8.0_111-b14) (build 1.8.0_111-8u111-b14-2ubuntu0.16.04.2-b14)
+# Java VM: OpenJDK 64-Bit Server VM (25.111-b14 mixed mode linux-amd64 compressed oops)
+# Problematic frame:
+# C  [libTensor.so+0x3241ad]  THCHeapUpdate+0x14
+#
+# Failed to write core dump. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00007f1c1800a000):  JavaThread "main" [_thread_in_native, id=7913, stack(0x00007f1c1ef9f000,0x00007f1c1f0a0000)]
+
+siginfo: si_signo: 11 (SIGSEGV), si_code: 1 (SEGV_MAPERR), si_addr: 0x0000000000000080
+
+Registers:
+RAX=0x0000000000000000, RBX=0x00007f1b63af9aa0, RCX=0x0000000000000002, RDX=0x0000000000000348
+RSP=0x00007f1c1f09bc90, RBP=0x00007f1c1f09bcb0, RSI=0x0000000000000348, RDI=0x0000000000000000
+R8 =0x00007f1b2e29946c, R9 =0x00007f1c1a4b93e0, R10=0x0000000000001315, R11=0x00007f1b2db77199
+R12=0x0000000000000000, R13=0x00007f1b63af9aa0, R14=0x00007f1c1f09bef8, R15=0x00007f1c1800a000
+RIP=0x00007f1b2db771ad, EFLAGS=0x0000000000010206, CSGSFS=0x0000000000000033, ERR=0x0000000000000004
+  TRAPNO=0x000000000000000e
+
+Top of Stack: (sp=0x00007f1c1f09bc90)
+0x00007f1c1f09bc90:   0000000000000348 0000000000000000
+0x00007f1c1f09bca0:   00007f1b63af9aa0 00007f1c199109e0
+0x00007f1c1f09bcb0:   00007f1c1f09bd00 00007f1b2db997f0
+0x00007f1c1f09bcc0:   0000000000000000 00000000000000d2
+0x00007f1c1f09bcd0:   00007f1c1a4ec260 0000000000000000
+0x00007f1c1f09bce0:   00007f1b63af9aa0 0000000000000000
+0x00007f1c1f09bcf0:   0000000000000000 aeef53b532eeb800
+0x00007f1c1f09bd00:   00007f1c1f09bd60 00007f1b2db8a849
+0x00007f1c1f09bd10:   0000000000000004 0000000000000000
+0x00007f1c1f09bd20:   00007f1c1f09bdb0 0000000100000000
+0x00007f1c1f09bd30:   00007f1c1a4ec190 0000000000000000
+0x00007f1c1f09bd40:   3831333536323034 ffffffff1a4ec190
+0x00007f1c1f09bd50:   0000000000000001 00000000000000d2
+0x00007f1c1f09bd60:   00007f1c1f09bde0 00007f1b2db88c90
+0x00007f1c1f09bd70:   0000000000000000 ffffffffffffffff
+0x00007f1c1f09bd80:   ffffffffffffffff ffffffffffffffff
+0x00007f1c1f09bd90:   00000000000000d2 0000000000000000
+0x00007f1c1f09bda0:   0000000000000000 00007f1c1a4ec190
+0x00007f1c1f09bdb0:   00000000000000d2 ffffffffffffffff
+0x00007f1c1f09bdc0:   ffffffffffffffff ffffffffffffffff
+0x00007f1c1f09bdd0:   00007f1b63af9aa0 aeef53b532eeb800
+0x00007f1c1f09bde0:   00007f1c1f09be00 00007f1b2db88b8f
+0x00007f1c1f09bdf0:   00000000000000d2 0000000000000000
+0x00007f1c1f09be00:   00007f1c1f09be60 00007f1b2dabcc2b
+0x00007f1c1f09be10:   00007f1c1f09bee8 0000000000000000
+0x00007f1c1f09be20:   00007f1c1f09bef8 00007f1c1800a1e0
+0x00007f1c1f09be30:   00007f1c00000001 00007f1b63af9aa0
+0x00007f1c1f09be40:   00007f1c1a4b9010 00007f1b63af9aa0
+0x00007f1c1f09be50:   00007f1c1f09bec8 00007f1b63af9aa0
+0x00007f1c1f09be60:   00007f1c1f09bec8 00007f1c089f0774
+0x00007f1c1f09be70:   00007f1c1f09bec8 00007f1c089f0507
+0x00007f1c1f09be80:   00007f1c089f04c2 00007f1c1f09be88 
+
+Instructions: (pc=0x00007f1b2db771ad)
+0x00007f1b2db7718d:   d0 48 8b 45 e8 48 89 50 78 90 c9 c3 55 48 89 e5
+0x00007f1b2db7719d:   48 83 ec 20 48 89 7d e8 48 89 75 e0 48 8b 45 e8
+0x00007f1b2db771ad:   48 8b 90 80 00 00 00 48 8b 45 e0 48 01 c2 48 8b
+0x00007f1b2db771bd:   45 e8 48 89 90 80 00 00 00 48 8b 45 e8 48 8b 80 
+
+Register to memory mapping:
+
+RAX=0x0000000000000000 is an unknown value
+RBX={method} {0x00007f1b63af9aa0} 'init' '([F[I)J' in 'be/iminds/iot/dianne/tensor/Tensor'
+RCX=0x0000000000000002 is an unknown value
+RDX=0x0000000000000348 is an unknown value
+RSP=0x00007f1c1f09bc90 is pointing into the stack for thread: 0x00007f1c1800a000
+RBP=0x00007f1c1f09bcb0 is pointing into the stack for thread: 0x00007f1c1800a000
+RSI=0x0000000000000348 is an unknown value
+RDI=0x0000000000000000 is an unknown value
+R8 =0x00007f1b2e29946c: <offset 0xa4646c> in /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/25/lib/libTensor.so at 0x00007f1b2d853000
+R9 =0x00007f1c1a4b93e0 is an unknown value
+R10=0x0000000000001315 is an unknown value
+R11=0x00007f1b2db77199: THCHeapUpdate+0 in /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/25/lib/libTensor.so at 0x00007f1b2d853000
+R12=0x0000000000000000 is an unknown value
+R13={method} {0x00007f1b63af9aa0} 'init' '([F[I)J' in 'be/iminds/iot/dianne/tensor/Tensor'
+R14=0x00007f1c1f09bef8 is pointing into the stack for thread: 0x00007f1c1800a000
+R15=0x00007f1c1800a000 is a thread
+
+
+Stack: [0x00007f1c1ef9f000,0x00007f1c1f0a0000],  sp=0x00007f1c1f09bc90,  free space=1011k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [libTensor.so+0x3241ad]  THCHeapUpdate+0x14
+C  [libTensor.so+0x3467f0]  THCudaStorage_resize+0x125
+C  [libTensor.so+0x337849]  THCudaTensor_rawResize+0x397
+C  [libTensor.so+0x335c90]  THCudaTensor_newWithSize4d+0x8e
+C  [libTensor.so+0x335b8f]  THCudaTensor_newWithSize1d+0x35
+C  [libTensor.so+0x269c2b]  Java_be_iminds_iot_dianne_tensor_Tensor_init+0xa5
+j  be.iminds.iot.dianne.tensor.Tensor.init([F[I)J+0
+j  be.iminds.iot.dianne.tensor.Tensor.<init>([F[I)V+8
+j  be.iminds.iot.dianne.tensor.Tensor.<init>([I)V+3
+j  be.iminds.iot.dianne.repository.file.DianneFileRepository.load(Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/tensor/Tensor;+226
+j  be.iminds.iot.dianne.repository.file.DianneFileRepository.loadParameters(Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/tensor/Tensor;+3
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x66088b]
+V  [libjvm.so+0x935a26]
+V  [libjvm.so+0x93773f]
+V  [libjvm.so+0x6ac489]  JVM_InvokeMethod+0x119
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  be.iminds.aiolos.proxy.ServiceProxy.invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+646
+j  com.sun.proxy.$Proxy1.loadParameters(Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/tensor/Tensor;+20
+j  be.iminds.iot.dianne.nn.runtime.DianneRuntimeImpl.deployModule(Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleDTO;Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleInstanceDTO;+77
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x66088b]
+V  [libjvm.so+0x935a26]
+V  [libjvm.so+0x93773f]
+V  [libjvm.so+0x6ac489]  JVM_InvokeMethod+0x119
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  be.iminds.aiolos.proxy.ServiceProxy.invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+646
+j  com.sun.proxy.$Proxy0.deployModule(Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleDTO;Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleInstanceDTO;+24
+j  be.iminds.iot.dianne.nn.platform.DiannePlatformImpl.deployNeuralNetwork(Ljava/lang/String;Ljava/lang/String;Ljava/util/UUID;Ljava/util/Map;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/NeuralNetworkInstanceDTO;+233
+j  be.iminds.iot.dianne.nn.platform.DiannePlatformImpl.deployNeuralNetwork(Ljava/lang/String;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/NeuralNetworkInstanceDTO;+12
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x66088b]
+V  [libjvm.so+0x935a26]
+V  [libjvm.so+0x93773f]
+V  [libjvm.so+0x6ac489]  JVM_InvokeMethod+0x119
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  be.iminds.aiolos.proxy.ServiceProxy.invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+646
+j  com.sun.proxy.$Proxy3.deployNeuralNetwork(Ljava/lang/String;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/NeuralNetworkInstanceDTO;+20
+j  be.iminds.iot.dianne.nn.test.DianneTest.deployNN(Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/NeuralNetwork;+10
+j  be.iminds.iot.dianne.nn.test.integration.WrongSizeTest.testWrongInputSize()V+3
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x66088b]
+V  [libjvm.so+0x935a26]
+V  [libjvm.so+0x93773f]
+V  [libjvm.so+0x6ac489]  JVM_InvokeMethod+0x119
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  junit.framework.TestCase.runTest()V+107
+j  junit.framework.TestCase.runBare()V+7
+j  junit.framework.TestResult$1.protect()V+4
+j  junit.framework.TestResult.runProtected(Ljunit/framework/Test;Ljunit/framework/Protectable;)V+1
+j  junit.framework.TestResult.run(Ljunit/framework/TestCase;)V+18
+j  junit.framework.TestCase.run(Ljunit/framework/TestResult;)V+2
+j  junit.framework.TestSuite.runTest(Ljunit/framework/Test;Ljunit/framework/TestResult;)V+2
+j  junit.framework.TestSuite.run(Ljunit/framework/TestResult;)V+40
+j  junit.framework.TestSuite.runTest(Ljunit/framework/Test;Ljunit/framework/TestResult;)V+2
+j  junit.framework.TestSuite.run(Ljunit/framework/TestResult;)V+40
+j  aQute.junit.Activator.test(Lorg/osgi/framework/Bundle;Ljava/lang/String;Ljava/io/Writer;)I+451
+j  aQute.junit.Activator.automatic()V+335
+j  aQute.junit.Activator.run()V+327
+j  aQute.launcher.Launcher$5.call()Ljava/lang/Integer;+7
+j  aQute.launcher.Launcher$5.call()Ljava/lang/Object;+1
+j  aQute.launcher.Launcher.run([Ljava/lang/String;)I+273
+j  aQute.launcher.Launcher.main([Ljava/lang/String;)V+164
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x66088b]
+V  [libjvm.so+0x6825ce]
+V  [libjvm.so+0x684eff]
+C  [libjli.so+0x3552]
+C  [libjli.so+0x73dd]
+C  [libpthread.so.0+0x76ba]  start_thread+0xca
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  be.iminds.iot.dianne.tensor.Tensor.init([F[I)J+0
+j  be.iminds.iot.dianne.tensor.Tensor.<init>([F[I)V+8
+j  be.iminds.iot.dianne.tensor.Tensor.<init>([I)V+3
+j  be.iminds.iot.dianne.repository.file.DianneFileRepository.load(Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/tensor/Tensor;+226
+j  be.iminds.iot.dianne.repository.file.DianneFileRepository.loadParameters(Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/tensor/Tensor;+3
+v  ~StubRoutines::call_stub
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  be.iminds.aiolos.proxy.ServiceProxy.invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+646
+j  com.sun.proxy.$Proxy1.loadParameters(Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/tensor/Tensor;+20
+j  be.iminds.iot.dianne.nn.runtime.DianneRuntimeImpl.deployModule(Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleDTO;Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleInstanceDTO;+77
+v  ~StubRoutines::call_stub
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  be.iminds.aiolos.proxy.ServiceProxy.invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+646
+j  com.sun.proxy.$Proxy0.deployModule(Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleDTO;Ljava/util/UUID;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/ModuleInstanceDTO;+24
+j  be.iminds.iot.dianne.nn.platform.DiannePlatformImpl.deployNeuralNetwork(Ljava/lang/String;Ljava/lang/String;Ljava/util/UUID;Ljava/util/Map;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/NeuralNetworkInstanceDTO;+233
+j  be.iminds.iot.dianne.nn.platform.DiannePlatformImpl.deployNeuralNetwork(Ljava/lang/String;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/NeuralNetworkInstanceDTO;+12
+v  ~StubRoutines::call_stub
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  be.iminds.aiolos.proxy.ServiceProxy.invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;+646
+j  com.sun.proxy.$Proxy3.deployNeuralNetwork(Ljava/lang/String;[Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/module/dto/NeuralNetworkInstanceDTO;+20
+j  be.iminds.iot.dianne.nn.test.DianneTest.deployNN(Ljava/lang/String;)Lbe/iminds/iot/dianne/api/nn/NeuralNetwork;+10
+j  be.iminds.iot.dianne.nn.test.integration.WrongSizeTest.testWrongInputSize()V+3
+v  ~StubRoutines::call_stub
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+J 884 C1 sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (10 bytes) @ 0x00007f1c08d47e0c [0x00007f1c08d47d00+0x10c]
+J 883 C1 java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (62 bytes) @ 0x00007f1c08d485dc [0x00007f1c08d481e0+0x3fc]
+j  junit.framework.TestCase.runTest()V+107
+j  junit.framework.TestCase.runBare()V+7
+j  junit.framework.TestResult$1.protect()V+4
+j  junit.framework.TestResult.runProtected(Ljunit/framework/Test;Ljunit/framework/Protectable;)V+1
+j  junit.framework.TestResult.run(Ljunit/framework/TestCase;)V+18
+j  junit.framework.TestCase.run(Ljunit/framework/TestResult;)V+2
+j  junit.framework.TestSuite.runTest(Ljunit/framework/Test;Ljunit/framework/TestResult;)V+2
+j  junit.framework.TestSuite.run(Ljunit/framework/TestResult;)V+40
+j  junit.framework.TestSuite.runTest(Ljunit/framework/Test;Ljunit/framework/TestResult;)V+2
+j  junit.framework.TestSuite.run(Ljunit/framework/TestResult;)V+40
+j  aQute.junit.Activator.test(Lorg/osgi/framework/Bundle;Ljava/lang/String;Ljava/io/Writer;)I+451
+j  aQute.junit.Activator.automatic()V+335
+j  aQute.junit.Activator.run()V+327
+j  aQute.launcher.Launcher$5.call()Ljava/lang/Integer;+7
+j  aQute.launcher.Launcher$5.call()Ljava/lang/Object;+1
+j  aQute.launcher.Launcher.run([Ljava/lang/String;)I+273
+j  aQute.launcher.Launcher.main([Ljava/lang/String;)V+164
+v  ~StubRoutines::call_stub
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x00007f1c1967c000 JavaThread "process reaper" daemon [_thread_blocked, id=7964, stack(0x00007f1bd8020000,0x00007f1bd8059000)]
+  0x00007f1c19616800 JavaThread "pool-2-thread-1" [_thread_blocked, id=7962, stack(0x00007f1b635f8000,0x00007f1b636f9000)]
+  0x00007f1c19561000 JavaThread "Thread-26" [_thread_blocked, id=7961, stack(0x00007f1b636f9000,0x00007f1b637fa000)]
+  0x00007f1c194fa800 JavaThread "Thread-25" daemon [_thread_in_native, id=7960, stack(0x00007f1b637fa000,0x00007f1b638fb000)]
+  0x00007f1c19346000 JavaThread "SCR Component Actor" daemon [_thread_blocked, id=7959, stack(0x00007f1b63afb000,0x00007f1b63bfc000)]
+  0x00007f1c19276800 JavaThread "Thread-24" daemon [_thread_blocked, id=7958, stack(0x00007f1b63bfc000,0x00007f1b63cfd000)]
+  0x00007f1c192a3000 JavaThread "Thread-23" daemon [_thread_blocked, id=7957, stack(0x00007f1b63cfd000,0x00007f1b63dfe000)]
+  0x00007f1b68003000 JavaThread "Thread-22" daemon [_thread_blocked, id=7956, stack(0x00007f1b63dfe000,0x00007f1b63eff000)]
+  0x00007f1b68001000 JavaThread "Thread-21" daemon [_thread_blocked, id=7955, stack(0x00007f1b63eff000,0x00007f1b64000000)]
+  0x00007f1c19267000 JavaThread "Thread-20" daemon [_thread_blocked, id=7954, stack(0x00007f1bd8059000,0x00007f1bd815a000)]
+  0x00007f1c19253000 JavaThread "Thread-19" [_thread_blocked, id=7953, stack(0x00007f1bd815a000,0x00007f1bd825b000)]
+  0x00007f1c19202000 JavaThread "Thread-18" daemon [_thread_blocked, id=7952, stack(0x00007f1bd825b000,0x00007f1bd835c000)]
+  0x00007f1c191fe000 JavaThread "Thread-17" daemon [_thread_blocked, id=7951, stack(0x00007f1bd835c000,0x00007f1bd845d000)]
+  0x00007f1c191f2800 JavaThread "Thread-15" daemon [_thread_blocked, id=7949, stack(0x00007f1bd845d000,0x00007f1bd855e000)]
+  0x00007f1c191dc000 JavaThread "Thread-14" daemon [_thread_blocked, id=7948, stack(0x00007f1bd855e000,0x00007f1bd865f000)]
+  0x00007f1c191a1800 JavaThread "Thread-13" daemon [_thread_blocked, id=7947, stack(0x00007f1bd865f000,0x00007f1bd8760000)]
+  0x00007f1c18ffd000 JavaThread "Gogo shell" [_thread_in_native, id=7946, stack(0x00007f1bd8760000,0x00007f1bd8861000)]
+  0x00007f1c18f01000 JavaThread "CM Event Dispatcher" daemon [_thread_blocked, id=7945, stack(0x00007f1bd8861000,0x00007f1bd8962000)]
+  0x00007f1c18f00800 JavaThread "CM Configuration Updater" daemon [_thread_blocked, id=7944, stack(0x00007f1bd8962000,0x00007f1bd8a63000)]
+  0x00007f1c18bf8000 JavaThread "qtp1627857534-22" [_thread_blocked, id=7943, stack(0x00007f1bd918f000,0x00007f1bd9290000)]
+  0x00007f1c18bf6000 JavaThread "qtp1627857534-21" [_thread_blocked, id=7942, stack(0x00007f1bd9290000,0x00007f1bd9391000)]
+  0x00007f1c18bf4800 JavaThread "qtp1627857534-20" [_thread_blocked, id=7941, stack(0x00007f1bd9391000,0x00007f1bd9492000)]
+  0x00007f1c18bf3000 JavaThread "qtp1627857534-19" [_thread_blocked, id=7940, stack(0x00007f1bd9492000,0x00007f1bd9593000)]
+  0x00007f1c18bf1000 JavaThread "qtp1627857534-18 Acceptor1 SelectChannelConnector@0.0.0.0:8080" [_thread_blocked, id=7939, stack(0x00007f1bd9593000,0x00007f1bd9694000)]
+  0x00007f1c18bef800 JavaThread "qtp1627857534-17 Acceptor0 SelectChannelConnector@0.0.0.0:8080" [_thread_in_native, id=7938, stack(0x00007f1bd9694000,0x00007f1bd9795000)]
+  0x00007f1c18bed800 JavaThread "qtp1627857534-16 Selector1" [_thread_in_native, id=7937, stack(0x00007f1bd9795000,0x00007f1bd9896000)]
+  0x00007f1c18bda800 JavaThread "qtp1627857534-15 Selector0" [_thread_in_native, id=7936, stack(0x00007f1bd9896000,0x00007f1bd9997000)]
+  0x00007f1c18b88000 JavaThread "HashSessionScavenger-0" daemon [_thread_blocked, id=7935, stack(0x00007f1bd9997000,0x00007f1bd9a98000)]
+  0x00007f1c18272000 JavaThread "FrameworkWaiter" [_thread_blocked, id=7933, stack(0x00007f1bd9a98000,0x00007f1bd9b99000)]
+  0x00007f1c1815b800 JavaThread "Timer-0" daemon [_thread_blocked, id=7932, stack(0x00007f1bd9b99000,0x00007f1bd9c9a000)]
+  0x00007f1c180cd000 JavaThread "Service Thread" daemon [_thread_blocked, id=7930, stack(0x00007f1bd9d9b000,0x00007f1bd9e9c000)]
+  0x00007f1c180bf800 JavaThread "C1 CompilerThread3" daemon [_thread_blocked, id=7929, stack(0x00007f1bd9e9c000,0x00007f1bd9f9d000)]
+  0x00007f1c180bb000 JavaThread "C2 CompilerThread2" daemon [_thread_blocked, id=7928, stack(0x00007f1bd9f9d000,0x00007f1bda09e000)]
+  0x00007f1c180b9800 JavaThread "C2 CompilerThread1" daemon [_thread_in_native, id=7927, stack(0x00007f1bda09e000,0x00007f1bda19f000)]
+  0x00007f1c180b6800 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=7926, stack(0x00007f1bda19f000,0x00007f1bda2a0000)]
+  0x00007f1c180b4800 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=7925, stack(0x00007f1c040c3000,0x00007f1c041c4000)]
+  0x00007f1c1808c000 JavaThread "Finalizer" daemon [_thread_blocked, id=7924, stack(0x00007f1c044ea000,0x00007f1c045eb000)]
+  0x00007f1c18087000 JavaThread "Reference Handler" daemon [_thread_blocked, id=7923, stack(0x00007f1c045eb000,0x00007f1c046ec000)]
+=>0x00007f1c1800a000 JavaThread "main" [_thread_in_native, id=7913, stack(0x00007f1c1ef9f000,0x00007f1c1f0a0000)]
+
+Other Threads:
+  0x00007f1c1807f800 VMThread [stack: 0x00007f1c046ec000,0x00007f1c047ed000] [id=7922]
+  0x00007f1c180cf000 WatcherThread [stack: 0x00007f1bd9c9a000,0x00007f1bd9d9b000] [id=7931]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap:
+ PSYoungGen      total 56320K, used 52172K [0x0000000781c00000, 0x0000000788a00000, 0x00000007c0000000)
+  eden space 48640K, 95% used [0x0000000781c00000,0x0000000784930fe8,0x0000000784b80000)
+  from space 7680K, 76% used [0x0000000784b80000,0x0000000785142038,0x0000000785300000)
+  to   space 7680K, 0% used [0x0000000788280000,0x0000000788280000,0x0000000788a00000)
+ ParOldGen       total 128512K, used 16K [0x0000000705400000, 0x000000070d180000, 0x0000000781c00000)
+  object space 128512K, 0% used [0x0000000705400000,0x0000000705404000,0x000000070d180000)
+ Metaspace       used 12874K, capacity 14568K, committed 14720K, reserved 1062912K
+  class space    used 1467K, capacity 1831K, committed 1920K, reserved 1048576K
+
+Card table byte_map: [0x00007f1c08042000,0x00007f1c08619000] byte_map_base: 0x00007f1c04818000
+
+Marking Bits: (ParMarkBitMap*) 0x00007f1c1e272220
+ Begin Bits: [0x00007f1bda2a0000, 0x00007f1bdd150000)
+ End Bits:   [0x00007f1bdd150000, 0x00007f1be0000000)
+
+Polling page: 0x00007f1c1f0c4000
+
+CodeCache: size=245760Kb used=4560Kb max_used=4560Kb free=241199Kb
+ bounds [0x00007f1c089d9000, 0x00007f1c08e59000, 0x00007f1c179d9000]
+ total_blobs=1663 nmethods=1308 adapters=270
+ compilation: enabled
+
+Compilation events (10 events):
+Event: 1,566 Thread 0x00007f1c180b6800 nmethod 1305 0x00007f1c08e457d0 code [0x00007f1c08e45920, 0x00007f1c08e45998]
+Event: 1,571 Thread 0x00007f1c180b9800 1306  s!   4       org.eclipse.concierge.BundleImpl$Revision$BundleClassLoader::findResource0 (471 bytes)
+Event: 1,572 Thread 0x00007f1c180bf800 1307       3       java.lang.String::compareTo (9 bytes)
+Event: 1,572 Thread 0x00007f1c180bf800 nmethod 1307 0x00007f1c08e452d0 code [0x00007f1c08e45440, 0x00007f1c08e45728]
+Event: 1,573 Thread 0x00007f1c180bf800 1308       3       java.lang.StringBuilder::append (8 bytes)
+Event: 1,573 Thread 0x00007f1c180bf800 nmethod 1308 0x00007f1c08e44f50 code [0x00007f1c08e450c0, 0x00007f1c08e45248]
+Event: 1,575 Thread 0x00007f1c180bf800 1309       3       java.lang.Long::parseLong (272 bytes)
+Event: 1,578 Thread 0x00007f1c180bf800 nmethod 1309 0x00007f1c08e4abd0 code [0x00007f1c08e4b2c0, 0x00007f1c08e4ff28]
+Event: 1,578 Thread 0x00007f1c180bf800 1310       3       java.io.BufferedReader::readLine (6 bytes)
+Event: 1,578 Thread 0x00007f1c180bf800 nmethod 1310 0x00007f1c08e4a810 code [0x00007f1c08e4a980, 0x00007f1c08e4ab28]
+
+GC Heap History (2 events):
+Event: 0,548 GC heap before
+{Heap before GC invocations=1 (full 0):
+ PSYoungGen      total 56320K, used 48640K [0x0000000781c00000, 0x0000000785a80000, 0x00000007c0000000)
+  eden space 48640K, 100% used [0x0000000781c00000,0x0000000784b80000,0x0000000784b80000)
+  from space 7680K, 0% used [0x0000000785300000,0x0000000785300000,0x0000000785a80000)
+  to   space 7680K, 0% used [0x0000000784b80000,0x0000000784b80000,0x0000000785300000)
+ ParOldGen       total 128512K, used 0K [0x0000000705400000, 0x000000070d180000, 0x0000000781c00000)
+  object space 128512K, 0% used [0x0000000705400000,0x0000000705400000,0x000000070d180000)
+ Metaspace       used 8614K, capacity 9216K, committed 9472K, reserved 1056768K
+  class space    used 977K, capacity 1223K, committed 1280K, reserved 1048576K
+Event: 0,555 GC heap after
+Heap after GC invocations=1 (full 0):
+ PSYoungGen      total 56320K, used 5896K [0x0000000781c00000, 0x0000000788a00000, 0x00000007c0000000)
+  eden space 48640K, 0% used [0x0000000781c00000,0x0000000781c00000,0x0000000784b80000)
+  from space 7680K, 76% used [0x0000000784b80000,0x0000000785142038,0x0000000785300000)
+  to   space 7680K, 0% used [0x0000000788280000,0x0000000788280000,0x0000000788a00000)
+ ParOldGen       total 128512K, used 16K [0x0000000705400000, 0x000000070d180000, 0x0000000781c00000)
+  object space 128512K, 0% used [0x0000000705400000,0x0000000705404000,0x000000070d180000)
+ Metaspace       used 8614K, capacity 9216K, committed 9472K, reserved 1056768K
+  class space    used 977K, capacity 1223K, committed 1280K, reserved 1048576K
+}
+
+Deoptimization events (10 events):
+Event: 1,388 Thread 0x00007f1c1800a000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f1c08d70ffc method=org.eclipse.concierge.BundleImpl.storeFile(Ljava/io/File;Ljava/io/InputStream;)V @ 36
+Event: 1,402 Thread 0x00007f1c1800a000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f1c08d4e464 method=org.eclipse.concierge.RFC1960Filter.stringCompare([CI[CI)I @ 132
+Event: 1,404 Thread 0x00007f1c1800a000 Uncommon trap: reason=speculate_class_check action=maybe_recompile pc=0x00007f1c08c33a64 method=java.util.ArrayList.<init>(Ljava/util/Collection;)V @ 36
+Event: 1,418 Thread 0x00007f1c1800a000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f1c08bc21d8 method=java.util.HashMap.hash(Ljava/lang/Object;)I @ 1
+Event: 1,418 Thread 0x00007f1c1800a000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f1c08d4d7b0 method=java.util.HashMap.hash(Ljava/lang/Object;)I @ 1
+Event: 1,418 Thread 0x00007f1c1800a000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f1c08c82ee8 method=java.util.HashMap.hash(Ljava/lang/Object;)I @ 1
+Event: 1,440 Thread 0x00007f1c1800a000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f1c08ba1894 method=java.util.HashMap.getNode(ILjava/lang/Object;)Ljava/util/HashMap$Node; @ 62
+Event: 1,440 Thread 0x00007f1c1800a000 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x00007f1c08d6886c method=java.util.HashMap.putVal(ILjava/lang/Object;Ljava/lang/Object;ZZ)Ljava/lang/Object; @ 91
+Event: 1,440 Thread 0x00007f1c1800a000 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x00007f1c08d6886c method=java.util.HashMap.putVal(ILjava/lang/Object;Ljava/lang/Object;ZZ)Ljava/lang/Object; @ 91
+Event: 1,556 Thread 0x00007f1c1800a000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x00007f1c08c41100 method=java.lang.AbstractStringBuilder.append(Ljava/lang/String;)Ljava/lang/AbstractStringBuilder; @ 1
+
+Internal exceptions (10 events):
+Event: 0,643 Thread 0x00007f1c1800a000 Exception <a 'java/lang/NullPointerException'> (0x00000007827c1a58) thrown at [/build/openjdk-8-8jAw7G/openjdk-8-8u111-b14/src/hotspot/src/share/vm/interpreter/linkResolver.cpp, line 1178]
+Event: 1,397 Thread 0x00007f1c1800a000 Exception <a 'java/lang/UnsatisfiedLinkError': be.iminds.iot.dianne.tensor.NativeTensorLoader.init(I)V> (0x0000000782c871c0) thrown at [/build/openjdk-8-8jAw7G/openjdk-8-8u111-b14/src/hotspot/src/share/vm/prims/nativeLookup.cpp, line 378]
+Event: 1,397 Thread 0x00007f1c1800a000 Exception <a 'java/lang/reflect/InvocationTargetException'> (0x0000000782c875b0) thrown at [/build/openjdk-8-8jAw7G/openjdk-8-8u111-b14/src/hotspot/src/share/vm/runtime/reflection.cpp, line 1092]
+Event: 1,418 Thread 0x00007f1c1800a000 Implicit null exception at 0x00007f1c08bc1f75 to 0x00007f1c08bc21c9
+Event: 1,418 Thread 0x00007f1c1800a000 Implicit null exception at 0x00007f1c08d4d718 to 0x00007f1c08d4d7a6
+Event: 1,418 Thread 0x00007f1c1800a000 Implicit null exception at 0x00007f1c08c82e6f to 0x00007f1c08c82ed9
+Event: 1,556 Thread 0x00007f1c1800a000 Implicit null exception at 0x00007f1c08c40d35 to 0x00007f1c08c410ed
+Event: 1,575 Thread 0x00007f1c19561000 Exception <a 'java/io/IOException'> (0x0000000782553338) thrown at [/build/openjdk-8-8jAw7G/openjdk-8-8u111-b14/src/hotspot/src/share/vm/prims/jni.cpp, line 709]
+Event: 1,575 Thread 0x00007f1c19561000 Exception <a 'java/io/IOException'> (0x00000007825545d0) thrown at [/build/openjdk-8-8jAw7G/openjdk-8-8u111-b14/src/hotspot/src/share/vm/prims/jni.cpp, line 709]
+Event: 1,575 Thread 0x00007f1c19561000 Exception <a 'java/io/IOException'> (0x000000078491c180) thrown at [/build/openjdk-8-8jAw7G/openjdk-8-8u111-b14/src/hotspot/src/share/vm/prims/jni.cpp, line 709]
+
+Events (10 events):
+Event: 1,561 loading class java/nio/DirectByteBuffer$Deallocator
+Event: 1,561 loading class java/nio/DirectByteBuffer$Deallocator done
+Event: 1,562 loading class java/io/StringReader
+Event: 1,562 loading class java/io/StringReader done
+Event: 1,568 loading class java/math/BigDecimal
+Event: 1,569 loading class java/math/BigDecimal done
+Event: 1,569 loading class java/math/BigInteger
+Event: 1,569 loading class java/math/BigInteger done
+Event: 1,573 loading class java/util/ConcurrentModificationException
+Event: 1,573 loading class java/util/ConcurrentModificationException done
+
+
+Dynamic libraries:
+00400000-00401000 r-xp 00000000 08:02 18885903                           /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+00600000-00601000 r--p 00000000 08:02 18885903                           /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+00601000-00602000 rw-p 00001000 08:02 18885903                           /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+01cca000-01ceb000 rw-p 00000000 00:00 0                                  [heap]
+200000000-600000000 ---p 00000000 00:00 0 
+705400000-70d180000 rw-p 00000000 00:00 0 
+70d180000-781c00000 ---p 00000000 00:00 0 
+781c00000-788a00000 rw-p 00000000 00:00 0 
+788a00000-7c0000000 ---p 00000000 00:00 0 
+7c0000000-7c01e0000 rw-p 00000000 00:00 0 
+7c01e0000-800000000 ---p 00000000 00:00 0 
+800000000-a00000000 ---p 00000000 00:00 0 
+7f1b28000000-7f1b28021000 rw-p 00000000 00:00 0 
+7f1b28021000-7f1b2c000000 ---p 00000000 00:00 0 
+7f1b2d853000-7f1b37d93000 r-xp 00000000 08:02 24379664                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/25/lib/libTensor.so
+7f1b37d93000-7f1b37f93000 ---p 0a540000 08:02 24379664                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/25/lib/libTensor.so
+7f1b37f93000-7f1b37fb1000 r--p 0a540000 08:02 24379664                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/25/lib/libTensor.so
+7f1b37fb1000-7f1b37fdc000 rw-p 0a55e000 08:02 24379664                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/25/lib/libTensor.so
+7f1b37fdc000-7f1b38000000 rw-p 00000000 00:00 0 
+7f1b38000000-7f1b38021000 rw-p 00000000 00:00 0 
+7f1b38021000-7f1b3c000000 ---p 00000000 00:00 0 
+7f1b3c000000-7f1b3c021000 rw-p 00000000 00:00 0 
+7f1b3c021000-7f1b40000000 ---p 00000000 00:00 0 
+7f1b40000000-7f1b4002c000 rw-p 00000000 00:00 0 
+7f1b4002c000-7f1b44000000 ---p 00000000 00:00 0 
+7f1b44000000-7f1b44021000 rw-p 00000000 00:00 0 
+7f1b44021000-7f1b48000000 ---p 00000000 00:00 0 
+7f1b48000000-7f1b48021000 rw-p 00000000 00:00 0 
+7f1b48021000-7f1b4c000000 ---p 00000000 00:00 0 
+7f1b4c000000-7f1b4c021000 rw-p 00000000 00:00 0 
+7f1b4c021000-7f1b50000000 ---p 00000000 00:00 0 
+7f1b50000000-7f1b50021000 rw-p 00000000 00:00 0 
+7f1b50021000-7f1b54000000 ---p 00000000 00:00 0 
+7f1b54000000-7f1b54021000 rw-p 00000000 00:00 0 
+7f1b54021000-7f1b58000000 ---p 00000000 00:00 0 
+7f1b58000000-7f1b58021000 rw-p 00000000 00:00 0 
+7f1b58021000-7f1b5c000000 ---p 00000000 00:00 0 
+7f1b5c000000-7f1b5c021000 rw-p 00000000 00:00 0 
+7f1b5c021000-7f1b60000000 ---p 00000000 00:00 0 
+7f1b61cc3000-7f1b61cc4000 ---p 00000000 00:00 0 
+7f1b61cc4000-7f1b624c4000 rw-p 00000000 00:00 0 
+7f1b624c4000-7f1b62508000 r-xp 00000000 08:02 18486427                   /usr/lib/nvidia-367/libnvidia-fatbinaryloader.so.367.57
+7f1b62508000-7f1b62708000 ---p 00044000 08:02 18486427                   /usr/lib/nvidia-367/libnvidia-fatbinaryloader.so.367.57
+7f1b62708000-7f1b62712000 rw-p 00044000 08:02 18486427                   /usr/lib/nvidia-367/libnvidia-fatbinaryloader.so.367.57
+7f1b62712000-7f1b62dd0000 r-xp 00000000 08:02 18353778                   /usr/lib/x86_64-linux-gnu/libcuda.so.367.57
+7f1b62dd0000-7f1b62fcf000 ---p 006be000 08:02 18353778                   /usr/lib/x86_64-linux-gnu/libcuda.so.367.57
+7f1b62fcf000-7f1b630eb000 rw-p 006bd000 08:02 18353778                   /usr/lib/x86_64-linux-gnu/libcuda.so.367.57
+7f1b630eb000-7f1b63177000 rw-p 00000000 00:00 0 
+7f1b63177000-7f1b632fa000 ---p 00000000 00:00 0 
+7f1b632fa000-7f1b635f8000 rw-p 00000000 00:00 0 
+7f1b635f8000-7f1b635fb000 ---p 00000000 00:00 0 
+7f1b635fb000-7f1b636f9000 rw-p 00000000 00:00 0 
+7f1b636f9000-7f1b636fc000 ---p 00000000 00:00 0 
+7f1b636fc000-7f1b637fa000 rw-p 00000000 00:00 0 
+7f1b637fa000-7f1b637fd000 ---p 00000000 00:00 0 
+7f1b637fd000-7f1b63afb000 rw-p 00000000 00:00 0 
+7f1b63afb000-7f1b63afe000 ---p 00000000 00:00 0 
+7f1b63afe000-7f1b63bfc000 rw-p 00000000 00:00 0 
+7f1b63bfc000-7f1b63bff000 ---p 00000000 00:00 0 
+7f1b63bff000-7f1b63cfd000 rw-p 00000000 00:00 0 
+7f1b63cfd000-7f1b63d00000 ---p 00000000 00:00 0 
+7f1b63d00000-7f1b63dfe000 rw-p 00000000 00:00 0 
+7f1b63dfe000-7f1b63e01000 ---p 00000000 00:00 0 
+7f1b63e01000-7f1b63eff000 rw-p 00000000 00:00 0 
+7f1b63eff000-7f1b63f02000 ---p 00000000 00:00 0 
+7f1b63f02000-7f1b64000000 rw-p 00000000 00:00 0 
+7f1b64000000-7f1b64021000 rw-p 00000000 00:00 0 
+7f1b64021000-7f1b68000000 ---p 00000000 00:00 0 
+7f1b68000000-7f1b68021000 rw-p 00000000 00:00 0 
+7f1b68021000-7f1b6c000000 ---p 00000000 00:00 0 
+7f1b6c000000-7f1b6c021000 rw-p 00000000 00:00 0 
+7f1b6c021000-7f1b70000000 ---p 00000000 00:00 0 
+7f1b70000000-7f1b70021000 rw-p 00000000 00:00 0 
+7f1b70021000-7f1b74000000 ---p 00000000 00:00 0 
+7f1b74000000-7f1b74021000 rw-p 00000000 00:00 0 
+7f1b74021000-7f1b78000000 ---p 00000000 00:00 0 
+7f1b78000000-7f1b78021000 rw-p 00000000 00:00 0 
+7f1b78021000-7f1b7c000000 ---p 00000000 00:00 0 
+7f1b7c000000-7f1b7c021000 rw-p 00000000 00:00 0 
+7f1b7c021000-7f1b80000000 ---p 00000000 00:00 0 
+7f1b80000000-7f1b800ca000 rw-p 00000000 00:00 0 
+7f1b800ca000-7f1b84000000 ---p 00000000 00:00 0 
+7f1b84000000-7f1b84021000 rw-p 00000000 00:00 0 
+7f1b84021000-7f1b88000000 ---p 00000000 00:00 0 
+7f1b88000000-7f1b8802b000 rw-p 00000000 00:00 0 
+7f1b8802b000-7f1b8c000000 ---p 00000000 00:00 0 
+7f1b8c000000-7f1b8c021000 rw-p 00000000 00:00 0 
+7f1b8c021000-7f1b90000000 ---p 00000000 00:00 0 
+7f1b90000000-7f1b90021000 rw-p 00000000 00:00 0 
+7f1b90021000-7f1b94000000 ---p 00000000 00:00 0 
+7f1b94000000-7f1b94021000 rw-p 00000000 00:00 0 
+7f1b94021000-7f1b98000000 ---p 00000000 00:00 0 
+7f1b98000000-7f1b98021000 rw-p 00000000 00:00 0 
+7f1b98021000-7f1b9c000000 ---p 00000000 00:00 0 
+7f1b9c000000-7f1b9c021000 rw-p 00000000 00:00 0 
+7f1b9c021000-7f1ba0000000 ---p 00000000 00:00 0 
+7f1ba0000000-7f1ba0021000 rw-p 00000000 00:00 0 
+7f1ba0021000-7f1ba4000000 ---p 00000000 00:00 0 
+7f1ba4000000-7f1ba4021000 rw-p 00000000 00:00 0 
+7f1ba4021000-7f1ba8000000 ---p 00000000 00:00 0 
+7f1ba8000000-7f1ba8021000 rw-p 00000000 00:00 0 
+7f1ba8021000-7f1bac000000 ---p 00000000 00:00 0 
+7f1bac000000-7f1bac021000 rw-p 00000000 00:00 0 
+7f1bac021000-7f1bb0000000 ---p 00000000 00:00 0 
+7f1bb0000000-7f1bb0021000 rw-p 00000000 00:00 0 
+7f1bb0021000-7f1bb4000000 ---p 00000000 00:00 0 
+7f1bb4000000-7f1bb4021000 rw-p 00000000 00:00 0 
+7f1bb4021000-7f1bb8000000 ---p 00000000 00:00 0 
+7f1bb8000000-7f1bb8021000 rw-p 00000000 00:00 0 
+7f1bb8021000-7f1bbc000000 ---p 00000000 00:00 0 
+7f1bbc000000-7f1bbc15f000 rw-p 00000000 00:00 0 
+7f1bbc15f000-7f1bc0000000 ---p 00000000 00:00 0 
+7f1bc0000000-7f1bc02bc000 rw-p 00000000 00:00 0 
+7f1bc02bc000-7f1bc4000000 ---p 00000000 00:00 0 
+7f1bc4000000-7f1bc41f0000 rw-p 00000000 00:00 0 
+7f1bc41f0000-7f1bc8000000 ---p 00000000 00:00 0 
+7f1bc8000000-7f1bc82f0000 rw-p 00000000 00:00 0 
+7f1bc82f0000-7f1bcc000000 ---p 00000000 00:00 0 
+7f1bcc000000-7f1bcc021000 rw-p 00000000 00:00 0 
+7f1bcc021000-7f1bd0000000 ---p 00000000 00:00 0 
+7f1bd0000000-7f1bd0021000 rw-p 00000000 00:00 0 
+7f1bd0021000-7f1bd4000000 ---p 00000000 00:00 0 
+7f1bd4000000-7f1bd4021000 rw-p 00000000 00:00 0 
+7f1bd4021000-7f1bd8000000 ---p 00000000 00:00 0 
+7f1bd8020000-7f1bd8023000 ---p 00000000 00:00 0 
+7f1bd8023000-7f1bd8059000 rw-p 00000000 00:00 0 
+7f1bd8059000-7f1bd805c000 ---p 00000000 00:00 0 
+7f1bd805c000-7f1bd815a000 rw-p 00000000 00:00 0 
+7f1bd815a000-7f1bd815d000 ---p 00000000 00:00 0 
+7f1bd815d000-7f1bd825b000 rw-p 00000000 00:00 0 
+7f1bd825b000-7f1bd825e000 ---p 00000000 00:00 0 
+7f1bd825e000-7f1bd835c000 rw-p 00000000 00:00 0 
+7f1bd835c000-7f1bd835f000 ---p 00000000 00:00 0 
+7f1bd835f000-7f1bd845d000 rw-p 00000000 00:00 0 
+7f1bd845d000-7f1bd8460000 ---p 00000000 00:00 0 
+7f1bd8460000-7f1bd855e000 rw-p 00000000 00:00 0 
+7f1bd855e000-7f1bd8561000 ---p 00000000 00:00 0 
+7f1bd8561000-7f1bd865f000 rw-p 00000000 00:00 0 
+7f1bd865f000-7f1bd8662000 ---p 00000000 00:00 0 
+7f1bd8662000-7f1bd8760000 rw-p 00000000 00:00 0 
+7f1bd8760000-7f1bd8763000 ---p 00000000 00:00 0 
+7f1bd8763000-7f1bd8861000 rw-p 00000000 00:00 0 
+7f1bd8861000-7f1bd8864000 ---p 00000000 00:00 0 
+7f1bd8864000-7f1bd8962000 rw-p 00000000 00:00 0 
+7f1bd8962000-7f1bd8965000 ---p 00000000 00:00 0 
+7f1bd8965000-7f1bd8a63000 rw-p 00000000 00:00 0 
+7f1bd8a63000-7f1bd8a74000 r-xp 00000000 08:02 18614727                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnio.so
+7f1bd8a74000-7f1bd8c74000 ---p 00011000 08:02 18614727                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnio.so
+7f1bd8c74000-7f1bd8c75000 r--p 00011000 08:02 18614727                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnio.so
+7f1bd8c75000-7f1bd8c76000 rw-p 00012000 08:02 18614727                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnio.so
+7f1bd8c76000-7f1bd8f77000 rw-p 00000000 00:00 0 
+7f1bd8f77000-7f1bd8f8e000 r-xp 00000000 08:02 18614753                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnet.so
+7f1bd8f8e000-7f1bd918d000 ---p 00017000 08:02 18614753                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnet.so
+7f1bd918d000-7f1bd918e000 r--p 00016000 08:02 18614753                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnet.so
+7f1bd918e000-7f1bd918f000 rw-p 00017000 08:02 18614753                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libnet.so
+7f1bd918f000-7f1bd9192000 ---p 00000000 00:00 0 
+7f1bd9192000-7f1bd9290000 rw-p 00000000 00:00 0 
+7f1bd9290000-7f1bd9293000 ---p 00000000 00:00 0 
+7f1bd9293000-7f1bd9391000 rw-p 00000000 00:00 0 
+7f1bd9391000-7f1bd9394000 ---p 00000000 00:00 0 
+7f1bd9394000-7f1bd9492000 rw-p 00000000 00:00 0 
+7f1bd9492000-7f1bd9495000 ---p 00000000 00:00 0 
+7f1bd9495000-7f1bd9593000 rw-p 00000000 00:00 0 
+7f1bd9593000-7f1bd9596000 ---p 00000000 00:00 0 
+7f1bd9596000-7f1bd9694000 rw-p 00000000 00:00 0 
+7f1bd9694000-7f1bd9697000 ---p 00000000 00:00 0 
+7f1bd9697000-7f1bd9795000 rw-p 00000000 00:00 0 
+7f1bd9795000-7f1bd9798000 ---p 00000000 00:00 0 
+7f1bd9798000-7f1bd9896000 rw-p 00000000 00:00 0 
+7f1bd9896000-7f1bd9899000 ---p 00000000 00:00 0 
+7f1bd9899000-7f1bd9997000 rw-p 00000000 00:00 0 
+7f1bd9997000-7f1bd999a000 ---p 00000000 00:00 0 
+7f1bd999a000-7f1bd9a98000 rw-p 00000000 00:00 0 
+7f1bd9a98000-7f1bd9a9b000 ---p 00000000 00:00 0 
+7f1bd9a9b000-7f1bd9b99000 rw-p 00000000 00:00 0 
+7f1bd9b99000-7f1bd9b9c000 ---p 00000000 00:00 0 
+7f1bd9b9c000-7f1bd9c9a000 rw-p 00000000 00:00 0 
+7f1bd9c9a000-7f1bd9c9b000 ---p 00000000 00:00 0 
+7f1bd9c9b000-7f1bd9d9b000 rw-p 00000000 00:00 0 
+7f1bd9d9b000-7f1bd9d9e000 ---p 00000000 00:00 0 
+7f1bd9d9e000-7f1bd9e9c000 rw-p 00000000 00:00 0 
+7f1bd9e9c000-7f1bd9e9f000 ---p 00000000 00:00 0 
+7f1bd9e9f000-7f1bd9f9d000 rw-p 00000000 00:00 0 
+7f1bd9f9d000-7f1bd9fa0000 ---p 00000000 00:00 0 
+7f1bd9fa0000-7f1bda09e000 rw-p 00000000 00:00 0 
+7f1bda09e000-7f1bda0a1000 ---p 00000000 00:00 0 
+7f1bda0a1000-7f1bda19f000 rw-p 00000000 00:00 0 
+7f1bda19f000-7f1bda1a2000 ---p 00000000 00:00 0 
+7f1bda1a2000-7f1be0000000 rw-p 00000000 00:00 0 
+7f1be0000000-7f1be0021000 rw-p 00000000 00:00 0 
+7f1be0021000-7f1be4000000 ---p 00000000 00:00 0 
+7f1be4000000-7f1be4021000 rw-p 00000000 00:00 0 
+7f1be4021000-7f1be8000000 ---p 00000000 00:00 0 
+7f1be8000000-7f1be8021000 rw-p 00000000 00:00 0 
+7f1be8021000-7f1bec000000 ---p 00000000 00:00 0 
+7f1bec000000-7f1bec021000 rw-p 00000000 00:00 0 
+7f1bec021000-7f1bf0000000 ---p 00000000 00:00 0 
+7f1bf0000000-7f1bf0021000 rw-p 00000000 00:00 0 
+7f1bf0021000-7f1bf4000000 ---p 00000000 00:00 0 
+7f1bf4000000-7f1bf4021000 rw-p 00000000 00:00 0 
+7f1bf4021000-7f1bf8000000 ---p 00000000 00:00 0 
+7f1bf8000000-7f1bf8021000 rw-p 00000000 00:00 0 
+7f1bf8021000-7f1bfc000000 ---p 00000000 00:00 0 
+7f1bfc000000-7f1bfc021000 rw-p 00000000 00:00 0 
+7f1bfc021000-7f1c00000000 ---p 00000000 00:00 0 
+7f1c00000000-7f1c00021000 rw-p 00000000 00:00 0 
+7f1c00021000-7f1c04000000 ---p 00000000 00:00 0 
+7f1c04026000-7f1c04027000 r--p 00000000 00:00 0 
+7f1c04027000-7f1c04029000 r--s 0000e000 08:02 24379659                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/37/bundle0
+7f1c04029000-7f1c0402a000 r--s 00004000 08:02 24379656                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/36/bundle0
+7f1c0402a000-7f1c0402d000 r--s 00015000 08:02 24379653                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/35/bundle0
+7f1c0402d000-7f1c0402f000 r--s 00007000 08:02 24379650                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/34/bundle0
+7f1c0402f000-7f1c04031000 r--s 0000c000 08:02 24379647                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/33/bundle0
+7f1c04031000-7f1c04034000 r--s 00013000 08:02 24379644                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/32/bundle0
+7f1c04034000-7f1c04035000 r--s 00005000 08:02 24379641                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/31/bundle0
+7f1c04035000-7f1c04037000 r--s 00006000 08:02 24379638                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/30/bundle0
+7f1c04037000-7f1c04038000 r--s 00009000 08:02 24379635                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/29/bundle0
+7f1c04038000-7f1c0403c000 r--s 00021000 08:02 24379632                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/28/bundle0
+7f1c0403c000-7f1c0403f000 r--s 0000a000 08:02 24379629                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/27/bundle0
+7f1c0403f000-7f1c04040000 r--s 0245a000 08:02 24379626                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/26/bundle0
+7f1c04040000-7f1c04042000 r--s 00004000 08:02 24379623                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/25/bundle0
+7f1c04042000-7f1c04045000 r--s 00020000 08:02 24379620                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/24/bundle0
+7f1c04045000-7f1c0404d000 r--s 0004f000 08:02 24379617                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/23/bundle0
+7f1c0404d000-7f1c0404f000 r--s 00016000 08:02 24379614                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/22/bundle0
+7f1c0404f000-7f1c04051000 r--s 00012000 08:02 24379611                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/21/bundle0
+7f1c04051000-7f1c04052000 r--s 00008000 08:02 24379608                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/20/bundle0
+7f1c04052000-7f1c04057000 r--s 0002f000 08:02 24379605                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/19/bundle0
+7f1c04057000-7f1c04059000 r--s 00012000 08:02 24379602                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/18/bundle0
+7f1c04059000-7f1c0405f000 r--s 0006a000 08:02 24379599                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/17/bundle0
+7f1c0405f000-7f1c04061000 r--s 0000b000 08:02 24379596                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/16/bundle0
+7f1c04061000-7f1c04066000 r--s 0002a000 08:02 24379593                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/15/bundle0
+7f1c04066000-7f1c04068000 r--s 00011000 08:02 24379590                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/14/bundle0
+7f1c04068000-7f1c0406e000 r--s 00051000 08:02 24379587                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/13/bundle0
+7f1c0406e000-7f1c04070000 r--s 00010000 08:02 24379584                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/12/bundle0
+7f1c04070000-7f1c04072000 r--s 00004000 08:02 24379581                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/11/bundle0
+7f1c04072000-7f1c04075000 r--s 00014000 08:02 24379578                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/10/bundle0
+7f1c04075000-7f1c04076000 r--s 0000b000 08:02 24379575                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/9/bundle0
+7f1c04076000-7f1c0407a000 r--s 0001b000 08:02 24379572                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/8/bundle0
+7f1c0407a000-7f1c0407b000 r--s 0000c000 08:02 24379569                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/7/bundle0
+7f1c0407b000-7f1c0408d000 r--s 001b4000 08:02 24379557                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/3/bundle0
+7f1c0408d000-7f1c040a8000 r--s 001d5000 08:02 18614760                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/nashorn.jar
+7f1c040a8000-7f1c040c3000 r--s 00394000 08:02 18614759                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/cldrdata.jar
+7f1c040c3000-7f1c040c6000 ---p 00000000 00:00 0 
+7f1c040c6000-7f1c041c4000 rw-p 00000000 00:00 0 
+7f1c041c4000-7f1c044ea000 r--p 00000000 08:02 18350340                   /usr/lib/locale/locale-archive
+7f1c044ea000-7f1c044ed000 ---p 00000000 00:00 0 
+7f1c044ed000-7f1c045eb000 rw-p 00000000 00:00 0 
+7f1c045eb000-7f1c045ee000 ---p 00000000 00:00 0 
+7f1c045ee000-7f1c046ec000 rw-p 00000000 00:00 0 
+7f1c046ec000-7f1c046ed000 ---p 00000000 00:00 0 
+7f1c046ed000-7f1c0643c000 rw-p 00000000 00:00 0 
+7f1c0643c000-7f1c0660a000 r--s 03bf1000 08:02 18614779                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar
+7f1c0660a000-7f1c07456000 rw-p 00000000 00:00 0 
+7f1c07456000-7f1c07457000 ---p 00000000 00:00 0 
+7f1c07457000-7f1c07557000 rw-p 00000000 00:00 0 
+7f1c07557000-7f1c07558000 ---p 00000000 00:00 0 
+7f1c07558000-7f1c07658000 rw-p 00000000 00:00 0 
+7f1c07658000-7f1c07659000 ---p 00000000 00:00 0 
+7f1c07659000-7f1c07759000 rw-p 00000000 00:00 0 
+7f1c07759000-7f1c0775a000 ---p 00000000 00:00 0 
+7f1c0775a000-7f1c0785a000 rw-p 00000000 00:00 0 
+7f1c0785a000-7f1c0785b000 ---p 00000000 00:00 0 
+7f1c0785b000-7f1c0795b000 rw-p 00000000 00:00 0 
+7f1c0795b000-7f1c0795c000 ---p 00000000 00:00 0 
+7f1c0795c000-7f1c07a5c000 rw-p 00000000 00:00 0 
+7f1c07a5c000-7f1c07a5d000 ---p 00000000 00:00 0 
+7f1c07a5d000-7f1c07b5d000 rw-p 00000000 00:00 0 
+7f1c07b5d000-7f1c07b5e000 ---p 00000000 00:00 0 
+7f1c07b5e000-7f1c07c9d000 rw-p 00000000 00:00 0 
+7f1c07c9d000-7f1c08042000 ---p 00000000 00:00 0 
+7f1c08042000-7f1c08081000 rw-p 00000000 00:00 0 
+7f1c08081000-7f1c08426000 ---p 00000000 00:00 0 
+7f1c08426000-7f1c0845d000 rw-p 00000000 00:00 0 
+7f1c0845d000-7f1c08618000 ---p 00000000 00:00 0 
+7f1c08618000-7f1c0862b000 rw-p 00000000 00:00 0 
+7f1c0862b000-7f1c089d9000 ---p 00000000 00:00 0 
+7f1c089d9000-7f1c08e59000 rwxp 00000000 00:00 0 
+7f1c08e59000-7f1c179d9000 ---p 00000000 00:00 0 
+7f1c179d9000-7f1c179e1000 r-xp 00000000 08:02 18614733                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libzip.so
+7f1c179e1000-7f1c17be0000 ---p 00008000 08:02 18614733                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libzip.so
+7f1c17be0000-7f1c17be1000 r--p 00007000 08:02 18614733                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libzip.so
+7f1c17be1000-7f1c17be2000 rw-p 00008000 08:02 18614733                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libzip.so
+7f1c17be2000-7f1c17bed000 r-xp 00000000 08:02 34341057                   /lib/x86_64-linux-gnu/libnss_files-2.23.so
+7f1c17bed000-7f1c17dec000 ---p 0000b000 08:02 34341057                   /lib/x86_64-linux-gnu/libnss_files-2.23.so
+7f1c17dec000-7f1c17ded000 r--p 0000a000 08:02 34341057                   /lib/x86_64-linux-gnu/libnss_files-2.23.so
+7f1c17ded000-7f1c17dee000 rw-p 0000b000 08:02 34341057                   /lib/x86_64-linux-gnu/libnss_files-2.23.so
+7f1c17dee000-7f1c17df4000 rw-p 00000000 00:00 0 
+7f1c17df4000-7f1c17dff000 r-xp 00000000 08:02 34341042                   /lib/x86_64-linux-gnu/libnss_nis-2.23.so
+7f1c17dff000-7f1c17ffe000 ---p 0000b000 08:02 34341042                   /lib/x86_64-linux-gnu/libnss_nis-2.23.so
+7f1c17ffe000-7f1c17fff000 r--p 0000a000 08:02 34341042                   /lib/x86_64-linux-gnu/libnss_nis-2.23.so
+7f1c17fff000-7f1c18000000 rw-p 0000b000 08:02 34341042                   /lib/x86_64-linux-gnu/libnss_nis-2.23.so
+7f1c18000000-7f1c1a502000 rw-p 00000000 00:00 0 
+7f1c1a502000-7f1c1c000000 ---p 00000000 00:00 0 
+7f1c1c000000-7f1c1c003000 r--s 0001d000 08:02 24379566                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/6/bundle0
+7f1c1c003000-7f1c1c005000 r--s 00008000 08:02 24379563                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/5/bundle0
+7f1c1c005000-7f1c1c008000 r--s 00014000 08:02 24379560                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/4/bundle0
+7f1c1c008000-7f1c1c04a000 rw-p 00000000 00:00 0 
+7f1c1c04a000-7f1c1c060000 r-xp 00000000 08:02 34341053                   /lib/x86_64-linux-gnu/libnsl-2.23.so
+7f1c1c060000-7f1c1c25f000 ---p 00016000 08:02 34341053                   /lib/x86_64-linux-gnu/libnsl-2.23.so
+7f1c1c25f000-7f1c1c260000 r--p 00015000 08:02 34341053                   /lib/x86_64-linux-gnu/libnsl-2.23.so
+7f1c1c260000-7f1c1c261000 rw-p 00016000 08:02 34341053                   /lib/x86_64-linux-gnu/libnsl-2.23.so
+7f1c1c261000-7f1c1c263000 rw-p 00000000 00:00 0 
+7f1c1c263000-7f1c1c26b000 r-xp 00000000 08:02 34341054                   /lib/x86_64-linux-gnu/libnss_compat-2.23.so
+7f1c1c26b000-7f1c1c46a000 ---p 00008000 08:02 34341054                   /lib/x86_64-linux-gnu/libnss_compat-2.23.so
+7f1c1c46a000-7f1c1c46b000 r--p 00007000 08:02 34341054                   /lib/x86_64-linux-gnu/libnss_compat-2.23.so
+7f1c1c46b000-7f1c1c46c000 rw-p 00008000 08:02 34341054                   /lib/x86_64-linux-gnu/libnss_compat-2.23.so
+7f1c1c46c000-7f1c1c499000 r-xp 00000000 08:02 18614726                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libjava.so
+7f1c1c499000-7f1c1c698000 ---p 0002d000 08:02 18614726                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libjava.so
+7f1c1c698000-7f1c1c699000 r--p 0002c000 08:02 18614726                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libjava.so
+7f1c1c699000-7f1c1c69b000 rw-p 0002d000 08:02 18614726                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libjava.so
+7f1c1c69b000-7f1c1c6aa000 r-xp 00000000 08:02 18614731                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libverify.so
+7f1c1c6aa000-7f1c1c8a9000 ---p 0000f000 08:02 18614731                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libverify.so
+7f1c1c8a9000-7f1c1c8ab000 r--p 0000e000 08:02 18614731                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libverify.so
+7f1c1c8ab000-7f1c1c8ac000 rw-p 00010000 08:02 18614731                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libverify.so
+7f1c1c8ac000-7f1c1c8b3000 r-xp 00000000 08:02 34341041                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f1c1c8b3000-7f1c1cab2000 ---p 00007000 08:02 34341041                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f1c1cab2000-7f1c1cab3000 r--p 00006000 08:02 34341041                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f1c1cab3000-7f1c1cab4000 rw-p 00007000 08:02 34341041                   /lib/x86_64-linux-gnu/librt-2.23.so
+7f1c1cab4000-7f1c1caca000 r-xp 00000000 08:02 34345314                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f1c1caca000-7f1c1ccc9000 ---p 00016000 08:02 34345314                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f1c1ccc9000-7f1c1ccca000 rw-p 00015000 08:02 34345314                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f1c1ccca000-7f1c1cdd2000 r-xp 00000000 08:02 34341051                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f1c1cdd2000-7f1c1cfd1000 ---p 00108000 08:02 34341051                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f1c1cfd1000-7f1c1cfd2000 r--p 00107000 08:02 34341051                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f1c1cfd2000-7f1c1cfd3000 rw-p 00108000 08:02 34341051                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f1c1cfd3000-7f1c1d145000 r-xp 00000000 08:02 18352258                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f1c1d145000-7f1c1d345000 ---p 00172000 08:02 18352258                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f1c1d345000-7f1c1d34f000 r--p 00172000 08:02 18352258                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f1c1d34f000-7f1c1d351000 rw-p 0017c000 08:02 18352258                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f1c1d351000-7f1c1d355000 rw-p 00000000 00:00 0 
+7f1c1d355000-7f1c1dfa4000 r-xp 00000000 08:02 18614735                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/libjvm.so
+7f1c1dfa4000-7f1c1e1a3000 ---p 00c4f000 08:02 18614735                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/libjvm.so
+7f1c1e1a3000-7f1c1e236000 r--p 00c4e000 08:02 18614735                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/libjvm.so
+7f1c1e236000-7f1c1e25f000 rw-p 00ce1000 08:02 18614735                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/libjvm.so
+7f1c1e25f000-7f1c1e28f000 rw-p 00000000 00:00 0 
+7f1c1e28f000-7f1c1e2a7000 r-xp 00000000 08:02 34341052                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f1c1e2a7000-7f1c1e4a6000 ---p 00018000 08:02 34341052                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f1c1e4a6000-7f1c1e4a7000 r--p 00017000 08:02 34341052                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f1c1e4a7000-7f1c1e4a8000 rw-p 00018000 08:02 34341052                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f1c1e4a8000-7f1c1e4ac000 rw-p 00000000 00:00 0 
+7f1c1e4ac000-7f1c1e4af000 r-xp 00000000 08:02 34341045                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f1c1e4af000-7f1c1e6ae000 ---p 00003000 08:02 34341045                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f1c1e6ae000-7f1c1e6af000 r--p 00002000 08:02 34341045                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f1c1e6af000-7f1c1e6b0000 rw-p 00003000 08:02 34341045                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f1c1e6b0000-7f1c1e6c9000 r-xp 00000000 08:02 34345467                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f1c1e6c9000-7f1c1e8c8000 ---p 00019000 08:02 34345467                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f1c1e8c8000-7f1c1e8c9000 r--p 00018000 08:02 34345467                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f1c1e8c9000-7f1c1e8ca000 rw-p 00019000 08:02 34345467                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f1c1e8ca000-7f1c1ea89000 r-xp 00000000 08:02 34341046                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f1c1ea89000-7f1c1ec89000 ---p 001bf000 08:02 34341046                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f1c1ec89000-7f1c1ec8d000 r--p 001bf000 08:02 34341046                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f1c1ec8d000-7f1c1ec8f000 rw-p 001c3000 08:02 34341046                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f1c1ec8f000-7f1c1ec93000 rw-p 00000000 00:00 0 
+7f1c1ec93000-7f1c1eca0000 r-xp 00000000 08:02 18614730                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/jli/libjli.so
+7f1c1eca0000-7f1c1eea0000 ---p 0000d000 08:02 18614730                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/jli/libjli.so
+7f1c1eea0000-7f1c1eea1000 r--p 0000d000 08:02 18614730                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/jli/libjli.so
+7f1c1eea1000-7f1c1eea2000 rw-p 0000e000 08:02 18614730                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/jli/libjli.so
+7f1c1eea2000-7f1c1eec8000 r-xp 00000000 08:02 34341035                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f1c1eec8000-7f1c1eeca000 r--s 00002000 08:02 24379554                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/2/bundle0
+7f1c1eeca000-7f1c1eecc000 r--s 0000a000 08:02 24379551                   /home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/fw/default/1/bundle0
+7f1c1eecc000-7f1c1eed0000 r--s 00097000 08:02 18614800                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jsse.jar
+7f1c1eed0000-7f1c1eed7000 r--s 00055000 08:02 23462426                   /home/jens/.bnd/cache/http%3A%2F%2Faiolos.intec.ugent.be%2Frepositories%2Forg.eclipse.concierge%2Forg.eclipse.concierge/org.eclipse.concierge-6.0.0.jar
+7f1c1eed7000-7f1c1eee1000 r--s 00116000 08:02 18614765                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/localedata.jar
+7f1c1eee1000-7f1c1ef9f000 rw-p 00000000 00:00 0 
+7f1c1ef9f000-7f1c1efa2000 ---p 00000000 00:00 0 
+7f1c1efa2000-7f1c1f0a5000 rw-p 00000000 00:00 0 
+7f1c1f0a5000-7f1c1f0a9000 r--s 00029000 08:02 24256911                   /home/jens/Documents/Git/dianne/cnf/cache/3.2.0/biz.aQute.launcher/biz.aQute.launcher-3.2.0.jar
+7f1c1f0a9000-7f1c1f0ab000 r--s 00001000 08:02 18614768                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/dnsns.jar
+7f1c1f0ab000-7f1c1f0ac000 r--s 00010000 08:02 18614766                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/zipfs.jar
+7f1c1f0ac000-7f1c1f0b0000 r--s 00037000 08:02 18614762                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/sunpkcs11.jar
+7f1c1f0b0000-7f1c1f0b3000 r--s 0000f000 08:02 18614767                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/icedtea-sound.jar
+7f1c1f0b3000-7f1c1f0b5000 r--s 00008000 08:02 18614764                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/sunec.jar
+7f1c1f0b5000-7f1c1f0b6000 r--s 0000a000 08:02 18614763                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/jaccess.jar
+7f1c1f0b6000-7f1c1f0bb000 r--s 0003b000 08:02 18614761                   /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/sunjce_provider.jar
+7f1c1f0bb000-7f1c1f0c3000 rw-s 00000000 08:02 24905780                   /tmp/hsperfdata_jens/7909
+7f1c1f0c3000-7f1c1f0c4000 rw-p 00000000 00:00 0 
+7f1c1f0c4000-7f1c1f0c5000 r--p 00000000 00:00 0 
+7f1c1f0c5000-7f1c1f0c7000 rw-p 00000000 00:00 0 
+7f1c1f0c7000-7f1c1f0c8000 r--p 00025000 08:02 34341035                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f1c1f0c8000-7f1c1f0c9000 rw-p 00026000 08:02 34341035                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f1c1f0c9000-7f1c1f0ca000 rw-p 00000000 00:00 0 
+7ffe4d3d7000-7ffe4d3f9000 rw-p 00000000 00:00 0                          [stack]
+7ffe4d3fa000-7ffe4d3fc000 r--p 00000000 00:00 0                          [vvar]
+7ffe4d3fc000-7ffe4d3fe000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+VM Arguments:
+jvm_args: -Dlauncher.properties="/home/jens/Documents/Git/dianne/be.iminds.iot.dianne.nn.test/generated/launch2406522615529768395.properties" -ea 
+java_command: aQute.launcher.Launcher
+java_class_path (initial): /home/jens/.bnd/cache/http%3A%2F%2Faiolos.intec.ugent.be%2Frepositories%2Forg.eclipse.concierge%2Forg.eclipse.concierge/org.eclipse.concierge-6.0.0.jar:/home/jens/Documents/Git/dianne/cnf/cache/3.2.0/biz.aQute.launcher/biz.aQute.launcher-3.2.0.jar
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+PATH=/home/jens/torch/install/bin:/usr/local/cuda-8.0/bin:/home/jens/torch/install/bin:/home/jens/bin:/home/jens/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+LD_LIBRARY_PATH=/home/jens/torch/install/lib:/usr/local/cuda-8.0/lib64:/home/jens/torch/install/lib:
+SHELL=/bin/bash
+DISPLAY=:0
+DYLD_LIBRARY_PATH=/home/jens/torch/install/lib:/home/jens/torch/install/lib:
+
+Signal Handlers:
+SIGSEGV: [libjvm.so+0xa65880], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGBUS: [libjvm.so+0xa65880], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGFPE: [libjvm.so+0x8af1c0], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGPIPE: [libjvm.so+0x8af1c0], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGXFSZ: [libjvm.so+0x8af1c0], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGILL: [libjvm.so+0x8af1c0], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGUSR1: SIG_DFL, sa_mask[0]=00000000000000000000000000000000, sa_flags=none
+SIGUSR2: [libjvm.so+0x8af070], sa_mask[0]=00100000000000000000000000000000, sa_flags=SA_RESTART|SA_SIGINFO
+SIGHUP: [libjvm.so+0x8af540], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGINT: [libjvm.so+0x8af540], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGTERM: [libjvm.so+0x8af540], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGQUIT: [libjvm.so+0x8af540], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+
+
+---------------  S Y S T E M  ---------------
+
+OS:DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=16.04
+DISTRIB_CODENAME=xenial
+DISTRIB_DESCRIPTION="Ubuntu 16.04.1 LTS"
+
+uname:Linux 4.4.0-59-generic #80-Ubuntu SMP Fri Jan 6 17:47:47 UTC 2017 x86_64
+libc:glibc 2.23 NPTL 2.23 
+rlimit: STACK 8192k, CORE 0k, NPROC 47306, NOFILE 65536, AS infinity
+load average:0,56 1,79 2,96
+
+/proc/meminfo:
+MemTotal:       12234168 kB
+MemFree:         6923808 kB
+MemAvailable:    9179068 kB
+Buffers:          113884 kB
+Cached:          2345504 kB
+SwapCached:            0 kB
+Active:          3977292 kB
+Inactive:         972864 kB
+Active(anon):    2492176 kB
+Inactive(anon):    30408 kB
+Active(file):    1485116 kB
+Inactive(file):   942456 kB
+Unevictable:          32 kB
+Mlocked:              32 kB
+SwapTotal:      12512252 kB
+SwapFree:       12512252 kB
+Dirty:            263168 kB
+Writeback:             0 kB
+AnonPages:       2483084 kB
+Mapped:           313356 kB
+Shmem:             31664 kB
+Slab:             177852 kB
+SReclaimable:     134592 kB
+SUnreclaim:        43260 kB
+KernelStack:       11440 kB
+PageTables:        36188 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    18629336 kB
+Committed_AS:    6435684 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:           0 kB
+VmallocChunk:          0 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:   1665024 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:      285184 kB
+DirectMap2M:     5937152 kB
+DirectMap1G:     7340032 kB
+
+
+CPU:total 8 (4 cores per cpu, 2 threads per core) family 6 model 60 stepping 3, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, avx2, aes, clmul, erms, lzcnt, ht, tsc, tscinvbit, bmi1, bmi2
+
+/proc/cpuinfo:
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3200.250
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3201.843
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 1
+initial apicid	: 1
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3200.062
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3234.468
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 3
+initial apicid	: 3
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 4
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3282.937
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 4
+initial apicid	: 4
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 5
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3268.312
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 5
+initial apicid	: 5
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 6
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3214.406
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 6
+initial apicid	: 6
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 7
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 60
+model name	: Intel(R) Core(TM) i7-4700MQ CPU @ 2.40GHz
+stepping	: 3
+microcode	: 0x17
+cpu MHz		: 3248.062
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 7
+initial apicid	: 7
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid xsaveopt dtherm ida arat pln pts
+bugs		:
+bogomips	: 4789.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+
+
+Memory: 4k page, physical 12234168k(6923808k free), swap 12512252k(12512252k free)
+
+vm_info: OpenJDK 64-Bit Server VM (25.111-b14) for linux-amd64 JRE (1.8.0_111-8u111-b14-2ubuntu0.16.04.2-b14), built on Oct 27 2016 18:10:19 by "buildd" with gcc 5.4.0 20160609
+
+time: Thu Jan 19 18:23:48 2017
+elapsed time: 1 seconds (0d 0h 0m 1s)
+

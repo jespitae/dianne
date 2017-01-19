@@ -18,7 +18,7 @@
 	be.iminds.iot.dianne.command;version=${dianne.version},\
 	be.iminds.iot.dianne.jsonrpc;version=${dianne.version},\
 	be.iminds.iot.dianne.coordinator;version=${dianne.version},\
-	be.iminds.iot.dianne.dashboard;version=${dianne.version}
+	be.iminds.iot.dianne.dashboard;version=${dianne.version}\
 
 -runproperties.coordinator:\
 	be.iminds.iot.dianne.runtime.name="Coordinator",\
