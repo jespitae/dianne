@@ -58,17 +58,57 @@ public class DianneGenerationCommands {
 		try {
 			nni = platform.deployNeuralNetwork(nnName, "test rnn", tags);
 			NeuralNetwork nn = dianne.getNeuralNetwork(nni).getValue();
+			
+			int yDim = 14;
+			int xDim = n / yDim;
+			
+			char[][] output = new char[yDim][xDim]; 
 
-			System.out.print(start);
+			int y = 0;
+			int x = 0;
+			boolean down = false;
+			
+			while(y < start.length()) {
+				if(down) {
+					output[y][x] = start.charAt((x * yDim) + y);					
+				} else {
+					output[yDim - y -1][x] = start.charAt((x * yDim) + y);					
+				}
+				if(y == (yDim - 1)) {
+					y = 0;
+					x++;
+					down = !down;
+				} else {
+					y++;
+				}
+			}
+					
+			//System.out.print(start);
 
 			for (int i = 0; i < start.length() - 1; i++) {
 				nextChar(nn, start.charAt(i));
 			}
 
 			char c = start.charAt(start.length() - 1);
-			for (int i = 0; i < n; i++) {
+			for (int i = start.length(); i < n; i++) {
 				c = nextChar(nn, c);
-				System.out.print(""+c);
+				if(down) {
+					output[y][x] = c;					
+				} else {
+					output[yDim - y -1][x] = c;					
+				}
+				if(y == (yDim - 1)) {
+					y = 0;
+					x++;
+					down = !down;
+				} else {
+					y++;
+				}
+				//System.out.print(""+c);
+			}
+			
+			for(int i = 0; i < yDim; i++) {
+				System.out.println(new String(output[i]));
 			}
 
 		} catch (Exception e) {
