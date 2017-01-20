@@ -52,7 +52,7 @@ import be.iminds.iot.dianne.tensor.TensorOps;
 		immediate=true,
 		property={"aiolos.unique=true","aiolos.combine=*"},
 		configurationPolicy=ConfigurationPolicy.REQUIRE,
-		configurationPid="be.iminds.iot.dianne.dataset.MarioSequenceDataset")
+		configurationPid="be.iminds.iot.dianne.dataset.MarioSequencesDataset")
 public class MarioSequencesDataset extends AbstractDataset implements SequenceDataset<Sample, Batch> {
 
 	private String[] files = {"mario-1-1.txt", "mario-1-2.txt", "mario-1-3.txt", "mario-2-1.txt", "mario-3-1.txt", 
@@ -69,6 +69,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 			targetType = "characer";
 				
 			data = new String[files.length];
+			noSamples = 0;
 			
 			for(int t = 0; t < files.length; t++) {
 
@@ -101,7 +102,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 				
 				data[t] = snakedData;
 				
-				noSamples = data[t].length();
+				noSamples += data[t].length();
 				
 				// no labels given, build up the vocabulary
 				if(!properties.containsKey("labels") 
@@ -198,7 +199,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 		}
 		List<Sample> s = seq.data;
 		
-		if(sequence > 1){
+		if(sequence > sequences()){
 			throw new RuntimeException("Invalid sequence number");
 		}
 
@@ -251,7 +252,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 		List<Batch> b = seq.data;
 		
 		for(int sequence : sequences){
-			if(sequence > 1){
+			if(sequence > sequences()){
 				throw new RuntimeException("Invalid sequence number");
 			}
 		}
