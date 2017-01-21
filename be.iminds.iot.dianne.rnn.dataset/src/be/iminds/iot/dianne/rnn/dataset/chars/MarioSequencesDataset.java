@@ -60,6 +60,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 			"mario-7-1.txt", "mario-8-1.txt"};
 	
 	private String[] data;
+	private String allData = "";
 	private String chars = "";
 
 	@Override
@@ -101,6 +102,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 				}
 				
 				data[t] = snakedData;
+				allData += data[t];
 				
 				noSamples += data[t].length();
 				
@@ -152,12 +154,12 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 
 	@Override
 	protected Tensor getInputSample(Tensor t, int index) {
-		return asTensor(data[0].charAt(index), t);
+		return asTensor(allData.charAt(index), t);
 	}
 
 	@Override
 	protected Tensor getTargetSample(Tensor t, int index) {
-		return asTensor(data[0].charAt(index+1), t);
+		return asTensor(allData.charAt(index+1), t);
 	}
 
 	private Tensor asTensor(char c, Tensor t){
