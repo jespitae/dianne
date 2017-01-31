@@ -56,8 +56,7 @@ import be.iminds.iot.dianne.tensor.TensorOps;
 public class MarioSequencesDataset extends AbstractDataset implements SequenceDataset<Sample, Batch> {
 
 	private String[] files = {"mario-1-1.txt", "mario-1-2.txt", "mario-1-3.txt", "mario-2-1.txt", "mario-3-1.txt", 
-			"mario-4-1.txt", "mario-4-2.txt", "mario-5-1.txt", "mario-6-1.txt", "mario-6-2.txt", "mario-6-3.txt", 
-			"mario-7-1.txt", "mario-8-1.txt"};
+			"mario-4-1.txt", "mario-4-2.txt", "mario-5-1.txt", "mario-6-1.txt", "mario-6-2.txt", "mario-6-3.txt", "mario-8-1.txt"};
 	
 	private String[] data;
 	private String allData = "";
