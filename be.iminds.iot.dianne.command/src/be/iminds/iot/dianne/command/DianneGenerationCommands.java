@@ -22,6 +22,8 @@
  *******************************************************************************/
 package be.iminds.iot.dianne.command;
 
+import java.io.PrintWriter;
+
 import org.apache.felix.service.command.Descriptor;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -83,8 +85,6 @@ public class DianneGenerationCommands {
 				}
 			}
 					
-			//System.out.print(start);
-
 			for (int i = 0; i < start.length() - 1; i++) {
 				nextChar(nn, start.charAt(i));
 			}
@@ -104,12 +104,14 @@ public class DianneGenerationCommands {
 				} else {
 					y++;
 				}
-				//System.out.print(""+c);
 			}
 			
+			PrintWriter writer = new PrintWriter("output.txt");
+			
 			for(int i = 0; i < yDim; i++) {
-				System.out.println(new String(output[i]));
+				writer.println(new String(output[i]));
 			}
+			writer.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();
