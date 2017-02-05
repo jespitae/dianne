@@ -47,22 +47,16 @@ public class GaussianNoiseActionStrategy implements ActionStrategy {
 	}
 
 	@Override
-	public Tensor processIteration(long i, Tensor state) throws Exception {
+	public Tensor processIteration(long s, long i, Tensor state) throws Exception {
 		Tensor action = policy.forward(state);
 		
 		noise.randn();
 		
-		double stdev = config.noiseMin + (config.noiseMax - config.noiseMin) * Math.exp(-i * config.noiseDecay);
+		double stdev = config.noiseMin + (config.noiseMax - config.noiseMin) * Math.exp(-s * config.noiseDecay);
 		
 		TensorOps.add(action, action, (float) stdev, noise);
 		
-		for(int a = 0; a < action.size(); a++) {
-			float v = action.get(a);
-			if(v < config.minValue)
-				action.set(config.minValue, a);
-			else if(v > config.maxValue)
-				action.set(config.maxValue, a);
-		}
+		TensorOps.clamp(action, action, config.minValue, config.maxValue);
 		
 		return action;
 	}

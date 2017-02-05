@@ -90,6 +90,7 @@ public class AgentImpl implements Agent {
 	private Thread actingThread;
 	private long i = 0;
 	private long seq = 0;
+	private long episode = 0;
 	private volatile boolean acting;
 	
 	private ActionStrategy strategy;
@@ -275,8 +276,11 @@ public class AgentImpl implements Agent {
 				props.put("aiolos.unique", true);
 				repoListenerReg = context.registerService(RepositoryListener.class, new RepositoryListener() {
 					@Override
-					public void onParametersUpdate(UUID nnId, Collection<UUID> moduleIds, String... tag) {
-						sync = true;
+					public synchronized void onParametersUpdate(UUID nnId, Collection<UUID> moduleIds, String... tag) {
+						if(sync == false){
+							sync = true;
+							episode++;
+						}
 					}
 				}, props);
 				
@@ -286,6 +290,7 @@ public class AgentImpl implements Agent {
 				// set count to zero
 				count = 0;
 				seq = 0;
+				episode = 0;
 				
 				// setup action strategy
 				strategy.setup(properties, env, nns);
@@ -300,13 +305,13 @@ public class AgentImpl implements Agent {
 		
 				s.input = env.getObservation(s.input);
 	
-				progress = new AgentProgress(0, 0, 0);
+				progress = new AgentProgress(seq, 0, 0, episode);
 				
 				if(config.clear){
 					pool.reset();
 				}
 				
-				for(i = 0; acting; i++) {
+				while(acting) {
 					// sync parameters
 					if(sync && count == 0){
 						for(int k=0;k<nns.length;k++){
@@ -319,15 +324,11 @@ public class AgentImpl implements Agent {
 						sync = false;
 					}
 					
-					progress.iterations++;
-					
 					// select action according to strategy
-					s.target = strategy.processIteration(i, s.input);
+					s.target = strategy.processIteration(progress.sequence, progress.iterations, s.input);
 	
 					// execute action and get reward
 					float reward = env.performAction(s.target);
-					progress.reward+=reward;
-					
 					if(s.reward == null){
 						s.reward = new Tensor(1);
 					}
@@ -342,9 +343,9 @@ public class AgentImpl implements Agent {
 					}
 					s.terminal.set(s.nextState == null ? 0.0f : 1.0f, 0);
 					
-					if(config.trace && i % config.traceInterval == 0){
-						System.out.println(progress);
-					}
+					// update progress
+					progress.reward+=reward;
+					progress.iterations++;
 					
 					// upload in batch
 					if(pool != null) {
@@ -380,8 +381,14 @@ public class AgentImpl implements Agent {
 					// TODO what with infinite horizon environments?
 					if(s.isTerminal()){
 						publishProgress(progress);
+						
+						// trace agent per sequence
+						if(config.trace && seq % config.traceInterval == 0){
+							System.out.println(progress);
+						}
+						
 						seq++;
-						progress = new AgentProgress(seq, 0, 0);
+						progress = new AgentProgress(seq, 0, 0, episode);
 						
 						do {
 							env.reset();

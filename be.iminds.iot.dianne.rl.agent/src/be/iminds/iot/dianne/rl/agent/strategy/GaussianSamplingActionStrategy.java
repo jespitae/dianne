@@ -28,7 +28,7 @@ public class GaussianSamplingActionStrategy implements ActionStrategy {
 	}
 
 	@Override
-	public Tensor processIteration(long i, Tensor state) throws Exception {
+	public Tensor processIteration(long s, long i, Tensor state) throws Exception {
 		Tensor actionParams = policy.forward(state);
 		
 		Tensor means = actionParams.narrow(0, 0, actionDims);
@@ -39,13 +39,7 @@ public class GaussianSamplingActionStrategy implements ActionStrategy {
 		TensorOps.cmul(action, action, stdevs);
 		TensorOps.add(action, action, means);
 		
-		for(int a = 0; a < action.size(); a++) {
-			float v = action.get(a);
-			if(v < config.minValue)
-				action.set(config.minValue, a);
-			else if(v > config.maxValue)
-				action.set(config.maxValue, a);
-		}
+		TensorOps.clamp(action, action, config.minValue, config.maxValue);
 		
 		return action;
 	}

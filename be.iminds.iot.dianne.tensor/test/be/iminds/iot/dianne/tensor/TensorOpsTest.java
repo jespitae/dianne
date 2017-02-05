@@ -539,4 +539,49 @@ public class TensorOpsTest {
 		Tensor result = TensorOps.scale2D(null, t, new int[]{3, 4, 4});
 		Assert.assertTrue(exp.equals(result, 0.00001f));
 	}
+	
+	@Test
+	public void testClamp1() {
+		Tensor t1 = new Tensor(2,2);
+		t1.fill(2);
+		t1.set(-1, 0, 0);
+		
+		Tensor r = TensorOps.clamp(null, t1, 0, 1);
+		
+		Tensor exp = new Tensor(2,2);
+		exp.fill(1);
+		exp.set(0, 0, 0);
+		
+		Assert.assertEquals(exp, r);
+	}
+	
+	@Test
+	public void testClamp2() {
+		Tensor t1 = new Tensor(2,2);
+		t1.fill(2);
+		t1.set(-1, 0, 0);
+		
+		Tensor r = new Tensor(2,2);
+		TensorOps.clamp(r, t1, 0, 1);
+		
+		Tensor exp = new Tensor(2,2);
+		exp.fill(1);
+		exp.set(0, 0, 0);
+		
+		Assert.assertEquals(exp, r);
+	}
+	
+	@Test
+	public void testClamp3() {
+		Tensor exp = new Tensor(2,2);
+				
+		Tensor t1 = new Tensor(2,2);
+		t1.fill(Float.POSITIVE_INFINITY);
+		TensorOps.clamp(t1, t1, -2.0f, -1.0f);
+		exp.fill(-1.0f);
+		Assert.assertEquals(exp, t1);
+
+		TensorOps.clamp(t1, t1, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+		Assert.assertEquals(exp, t1);
+	}
 }
