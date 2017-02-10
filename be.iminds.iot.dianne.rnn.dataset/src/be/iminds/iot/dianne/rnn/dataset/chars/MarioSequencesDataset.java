@@ -55,8 +55,12 @@ import be.iminds.iot.dianne.tensor.TensorOps;
 		configurationPid="be.iminds.iot.dianne.dataset.MarioSequencesDataset")
 public class MarioSequencesDataset extends AbstractDataset implements SequenceDataset<Sample, Batch> {
 
-	private String[] files = {"mario-1-1.txt", "mario-1-2.txt", "mario-1-3.txt", "mario-2-1.txt", "mario-3-1.txt", 
-			"mario-4-1.txt", "mario-4-2.txt", "mario-6-1.txt", "mario-6-2.txt", "mario-6-3.txt", "mario-8-1.txt"};
+	private String[] files = {"mario-1-1.txt", "mario-1-2.txt", "mario-1-3.txt", "mario-2-1.txt", "mario-3-3.txt", 
+			"mario-4-1.txt", "mario-4-2.txt", "mario-5-3.txt", "mario-6-1.txt", "mario-6-2.txt", "mario-6-3.txt", "mario-8-1.txt",
+			"SuperMarioBros2(J)-World1-1.txt", "SuperMarioBros2(J)-World1-3.txt", "SuperMarioBros2(J)-World2-1.txt"
+			, "SuperMarioBros2(J)-World2-2.txt", "SuperMarioBros2(J)-World2-3.txt", "SuperMarioBros2(J)-World3-3.txt"
+			, "SuperMarioBros2(J)-World4-1.txt", "SuperMarioBros2(J)-World4-3.txt", "SuperMarioBros2(J)-World5-2.txt"
+			, "SuperMarioBros2(J)-World6-3.txt", "SuperMarioBros2(J)-WorldA-3.txt", "SuperMarioBros2(J)-WorldB-3.txt"};
 	
 	private String[] data;
 	private String allData = "";

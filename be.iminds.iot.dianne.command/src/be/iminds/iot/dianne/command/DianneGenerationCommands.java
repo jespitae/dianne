@@ -146,6 +146,7 @@ public class DianneGenerationCommands {
 			// assume logsoftmax output, take exp
 			out = TensorOps.exp(out, out);
 		}
+			
 
 		double s = 0, r = Math.random();
 		int o = 0;
