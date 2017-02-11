@@ -64,7 +64,7 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 			inputType = "character";
 			targetType = "characer";
 			
-			String file = "mario-1-1.txt";
+			String file = "mario-4-1.txt";
 			
 			if(properties.containsKey("file")){
 				file = properties.get("file").toString();
