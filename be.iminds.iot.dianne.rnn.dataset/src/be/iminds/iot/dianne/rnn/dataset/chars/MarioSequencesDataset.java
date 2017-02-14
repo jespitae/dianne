@@ -72,7 +72,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 			inputType = "character";
 			targetType = "characer";
 				
-			data = new String[files.length];
+			data = new String[files.length * 2];
 			noSamples = 0;
 			
 			for(int t = 0; t < files.length; t++) {
@@ -80,8 +80,10 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 				// read the data
 				byte[] encoded = Files.readAllBytes(Paths.get(dir+File.separator+files[t]));
 				data[t] = new String(encoded, Charset.defaultCharset());
+				data[files.length + t] = new String(encoded, Charset.defaultCharset());
 				
-				String snakedData = "";
+				String snakedDataUp = "";
+				String snakedDataDown = "";
 				int dimY = 0;
 				
 				for(int i = 0; i < data[t].length(); i++) {
@@ -91,23 +93,29 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 				}
 				
 				int dimX = (data[t].length() / dimY) - 1;
+				
 				boolean down = false;
 				
 				for(int x = 0; x < dimX; x++) {
 					for(int y = 0; y < dimY; y++) {
 						if(down) {
-							snakedData += "" + data[t].charAt((y * (dimX + 1)) + x);
+							snakedDataUp += "" + data[t].charAt((y * (dimX + 1)) + x);
+							snakedDataDown += "" + data[files.length + t].charAt(((dimY - (y + 1)) * (dimX + 1)) + x);
 						} else {
-							snakedData += "" + data[t].charAt(((dimY - (y + 1)) * (dimX + 1)) + x);
+							snakedDataUp += "" + data[t].charAt(((dimY - (y + 1)) * (dimX + 1)) + x);
+							snakedDataDown += "" + data[files.length + t].charAt((y * (dimX + 1)) + x);
 						}
 					}
 					down = !down;
 				}
 				
-				data[t] = snakedData;
-				allData += data[t];
+				data[t] = snakedDataUp;
+				data[files.length + t] = snakedDataDown;
 				
-				noSamples += data[t].length();
+				allData += data[t];
+				allData += data[files.length + t];
+				
+				noSamples += (data[t].length() * 2);
 				
 				// no labels given, build up the vocabulary
 				if(!properties.containsKey("labels") 
@@ -186,7 +194,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 
 	@Override
 	public int sequences() {
-		return files.length;
+		return (files.length * 2);
 	}
 	
 	@Override

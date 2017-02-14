@@ -55,7 +55,8 @@ import be.iminds.iot.dianne.tensor.TensorOps;
 		configurationPid="be.iminds.iot.dianne.dataset.MarioSequenceDataset")
 public class MarioSequenceDataset extends AbstractDataset implements SequenceDataset<Sample, Batch> {
 
-	private String data;
+	private String[] data;
+	private String allData = "";
 	private String chars = "";
 
 	@Override
@@ -63,7 +64,10 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 		try {
 			inputType = "character";
 			targetType = "characer";
-			
+				
+			data = new String[2];
+			noSamples = 0;
+
 			String file = "mario-4-1.txt";
 			
 			if(properties.containsKey("file")){
@@ -72,54 +76,62 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 			
 			// read the data
 			byte[] encoded = Files.readAllBytes(Paths.get(dir+File.separator+file));
-			data = new String(encoded, Charset.defaultCharset());
-			
-
-			String snakedData = "";
+			data[0] = new String(encoded, Charset.defaultCharset());
+			data[1] = new String(encoded, Charset.defaultCharset());
+				
+			String snakedDataUp = "";
+			String snakedDataDown = "";
 			int dimY = 0;
-			
-			for(int i = 0; i < data.length(); i++) {
-				if(data.charAt(i) == '\n') {
+				
+			for(int i = 0; i < data[0].length(); i++) {
+				if(data[0].charAt(i) == '\n') {
 					dimY++;
 				}
 			}
-			
-			int dimX = (data.length() / dimY) - 1;
+				
+			int dimX = (data[0].length() / dimY) - 1;
+				
 			boolean down = false;
-			
+				
 			for(int x = 0; x < dimX; x++) {
 				for(int y = 0; y < dimY; y++) {
 					if(down) {
-						snakedData += "" + data.charAt((y * (dimX + 1)) + x);
+						snakedDataUp += "" + data[0].charAt((y * (dimX + 1)) + x);
+						snakedDataDown += "" + data[1].charAt(((dimY - (y + 1)) * (dimX + 1)) + x);
 					} else {
-						snakedData += "" + data.charAt(((dimY - (y + 1)) * (dimX + 1)) + x);
+						snakedDataUp += "" + data[0].charAt(((dimY - (y + 1)) * (dimX + 1)) + x);
+						snakedDataDown += "" + data[1].charAt((y * (dimX + 1)) + x);
 					}
 				}
 				down = !down;
 			}
-			
-			data = snakedData;
-			
-			noSamples = data.length();
-			
-			// no labels given, build up the vocabulary
-			if(!properties.containsKey("labels") 
-					&& !properties.containsKey("labelsFile")){
 				
-				data.chars().forEach(c -> {
-					if(!chars.contains(""+(char)c)){
-						chars+=""+(char)c;
-					}
-				});
+				data[0] = snakedDataUp;
+				data[1] = snakedDataDown;
 				
-				labels = new String[chars.length()];
-				for(int i=0;i<labels.length;i++){
-					labels[i] = ""+chars.charAt(i);
+				allData += data[0];
+				allData += data[1];
+				
+				noSamples += (data[0].length() * 2);
+				
+				// no labels given, build up the vocabulary
+				if(!properties.containsKey("labels") 
+						&& !properties.containsKey("labelsFile")){
+					
+					data[0].chars().forEach(c -> {
+						if(!chars.contains(""+(char)c)){
+							chars+=""+(char)c;
+						}
+					});
 				}
-				
-				inputDims = new int[]{chars.length()};
-				targetDims = new int[]{chars.length()};
+			
+			labels = new String[chars.length()];
+			for(int i=0;i<labels.length;i++){
+				labels[i] = ""+chars.charAt(i);
 			}
+			
+			inputDims = new int[]{chars.length()};
+			targetDims = new int[]{chars.length()};
 			
 		} catch(Exception e){
 			e.printStackTrace();
@@ -149,12 +161,12 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 
 	@Override
 	protected Tensor getInputSample(Tensor t, int index) {
-		return asTensor(data.charAt(index), t);
+		return asTensor(allData.charAt(index), t);
 	}
 
 	@Override
 	protected Tensor getTargetSample(Tensor t, int index) {
-		return asTensor(data.charAt(index+1), t);
+		return asTensor(allData.charAt(index+1), t);
 	}
 
 	private Tensor asTensor(char c, Tensor t){
@@ -178,15 +190,15 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 
 	@Override
 	public int sequences() {
-		return 1;
+		return 2;
 	}
 	
 	@Override
 	public int sequenceLength(int index){
-		if(index > 1){
+		if(index > sequences()){
 			throw new ArrayIndexOutOfBoundsException();
 		}
-		return data.length();
+		return data[index].length();
 	}
 
 	@Override
@@ -196,16 +208,16 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 		}
 		List<Sample> s = seq.data;
 		
-		if(sequence > 1){
+		if(sequence > sequences()){
 			throw new RuntimeException("Invalid sequence number");
 		}
 
-		if(index >= data.length()){
+		if(index >= data[sequence].length()){
 			throw new RuntimeException("Invalid start index: "+index);
 		}
 		
 		if(length == -1){
-			length = data.length();
+			length = data[sequence].length();
 		}
 		
 		Sample previous = null;
@@ -223,12 +235,12 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 			
 			int k = index + i;
 			if(i == 0){
-				char c = data.charAt(k);
+				char c = data[sequence].charAt(k);
 				asTensor(c, sample.input);
 			} 
 			
-			if(k+1 < data.length()){
-				char c = data.charAt(k+1);
+			if(k+1 < data[sequence].length()){
+				char c = data[sequence].charAt(k+1);
 				asTensor(c, sample.target);
 			} else {
 				sample.target.fill(Float.NaN);
@@ -249,21 +261,26 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 		List<Batch> b = seq.data;
 		
 		for(int sequence : sequences){
-			if(sequence > 1){
+			if(sequence > sequences()){
 				throw new RuntimeException("Invalid sequence number");
 			}
 		}
 
 		if(indices != null){
-			for(int index : indices){
-				if(index >= data.length()){
+			for(int i = 0; i < indices.length; i++){
+				if(indices[i] >= data[sequences[i]].length()){
 					throw new RuntimeException("Invalid start index");
 				}
 			}
 		}
 		
 		if(length == -1){
-			length = data.length();
+			length = data[0].length();
+			for(int i = 0; i < sequences(); i++){
+				if(data[i].length() < length){
+					length = data[i].length();
+				}
+			}
 		}
 		
 		Batch previous = null;
@@ -284,12 +301,12 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 				int k = start + i;
 				
 				if(i == 0){
-					char c = data.charAt(k);
+					char c = data[sequences[s]].charAt(k);
 					asTensor(c, batch.getSample(s).input);
 				} 
 				
-				if(k+1 < data.length()){
-					char c = data.charAt(k+1);
+				if(k+1 < data[sequences[s]].length()){
+					char c = data[sequences[s]].charAt(k+1);
 					asTensor(c, batch.getSample(s).target);
 				} else {
 					batch.getSample(s).target.fill(Float.NaN);
