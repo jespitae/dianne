@@ -117,23 +117,24 @@ function createResultChart(container, job, scale){
 			});
 		});
 	} else if(job.type==="ACT"){
-		// visualize act jobs as a running progress bar
 		container.empty();
  	  	DIANNE.agentResult(job.id).then(function(results){
+ 	  		var series = [];
 			$.each(results, function(i) {
 				var agentprogress = results[i];
-			
 				var reward = [];
-				$.each(agentprogress, function(i) {
-					var progress = agentprogress[i];
+				
+				$.each(agentprogress, function(k) {
+					var progress = agentprogress[k];
 					reward.push({
 						x: progress.sequence,
 		                y: progress.reward
 		            });
-				 });
+				});
 				
-				 createRewardChart(container, scale, reward);
+				series.push({name:'reward', data: reward});
 			});
+			createRewardChart(container, scale, series);
 		});
 	}
 }
@@ -155,7 +156,15 @@ function updateResultsChart(container, data){
 		x = Number(data.sequence);
 		y = Number(data.reward);
 	}
-	Highcharts.charts[index].series[0].addPoint([x, y], true, false, false);
+	
+	var s = 0;
+	if(data.worker !== undefined){
+		s = Number(data.worker);
+	}
+	
+	if(Highcharts.charts[index].series[s]!==undefined){
+		Highcharts.charts[index].series[s].addPoint([x, y], true, false, false);
+	}
 	
 	if(data.validationLoss !== undefined){
 		var v = Number(data.validationLoss);
@@ -164,33 +173,45 @@ function updateResultsChart(container, data){
 }
 
 function createLossChart(container, scale, minibatchLoss, validationLoss){
-	createLineChart(container, 'Iterations', 'Loss', scale, 'minibatch loss', minibatchLoss, 'validation loss', validationLoss);
+	createLineChart(container, 'Iterations', 'Loss', scale, [{name:'minibatch loss',data: minibatchLoss},{name:'validation loss',data: validationLoss}]);
 }
 
 function createQChart(container, scale, q){
-	createLineChart(container, 'Iterations', 'Q', scale, 'Q', q);
+	createLineChart(container, 'Iterations', 'Q', scale, [{name:'Q',data: q}]);
 }
 
-function createRewardChart(container, scale, reward){
-	createLineChart(container, 'Sequences', 'Reward', scale, 'reward', reward);
+function createRewardChart(container, scale, rewardseries){
+	createLineChart(container, 'Sequences', 'Reward', scale, rewardseries);
 }
+
 
 // generic line chart
-function createLineChart(container, xAxis, yAxis, scale, title, data, title2, data2) {
-	// if no data specified, initialize empty
-	data = initializeLineData(data);
-	data2 = initializeLineData(data2);
-	
+function createLineChart(container, xAxis, yAxis, scale, series) {
 	if(scale === undefined){
 		scale = 1;
 	}
+
+	// adjust chart width and height to dialog
+	var w = 500*scale;
+	var h = 250*scale;
+	
+	var maxW = $('.modal-dialog').width()+10;
+	if(maxW == 10){
+		maxW = $('#dashboard').width()+20;
+	}
+	
+	while(w > maxW){
+		w = w/2;
+		h = h/2;
+	}
+	
     container.highcharts({
         chart: {
             type: 'line',
             animation: false, // don't animate in old IE
             marginRight: 10,
-    		height: 250*scale,
-    		width: 500*scale
+    		height: h,
+    		width: w
         },
         title : {
         	text: null
@@ -214,7 +235,9 @@ function createLineChart(container, xAxis, yAxis, scale, title, data, title2, da
                 value: 0,
                 width: 1,
                 color: '#808080'
-            }]
+            }],
+            softMin: 0,
+            softMax: 0
         },
         legend: {
             enabled: false
@@ -225,37 +248,8 @@ function createLineChart(container, xAxis, yAxis, scale, title, data, title2, da
         credits: {
             enabled: false
         },
-        series: [{
-            name: title,
-            data: data
-        },
-        {
-            name: title2,
-            data: data2
-        }]
+        series: series
     });
-}
-
-function initializeLineData(data){
-	var i;
-	if(data===undefined){
-		data = [];
-	    for (i = -29; i <= 0; i += 1) {
-	    	data.push({
-	         	x: 0,
-	        	y: null
-	         });
-	    }
-	} else if(data.length < 30){
-		// if not enough data, add some empty points
-		for(i = 0; i < 30-data.length; i+=1){
-	    	data.unshift({
-	         	x: 0,
-	        	y: null
-	         });
-		}
-	}
-	return data;
 }
 
 // confusion matrix heatmap chart
