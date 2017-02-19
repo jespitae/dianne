@@ -23,6 +23,7 @@
 package be.iminds.iot.dianne.command;
 
 import java.io.PrintWriter;
+import java.util.Collections;
 
 import org.apache.felix.service.command.Descriptor;
 import org.osgi.service.component.annotations.Component;
@@ -70,7 +71,7 @@ public class DianneGenerationCommands {
 			int x = 0;
 			boolean down = false;
 			
-			while(y < start.length()) {
+			for(int i = 0; i < start.length(); i++) {
 				if(down) {
 					output[y][x] = start.charAt((x * yDim) + y);					
 				} else {
@@ -146,14 +147,24 @@ public class DianneGenerationCommands {
 			// assume logsoftmax output, take exp
 			out = TensorOps.exp(out, out);
 		}
-			
-
+		
+		int m = 0;
+		for(int i = 1; i < out.size(); i++) {
+			if(out.get(m) < out.get(i)) {
+				m = i;
+			}
+		}
+				
 		double s = 0, r = Math.random();
 		int o = 0;
 		while (o < out.size() && (s += out.get(o)) < r) {
 			o++;
 		}
 
+		if(labels[o].charAt(0) != labels[m].charAt(0)) {
+			System.out.println("Characters:" + labels[o].charAt(0) + " - " + labels[m].charAt(0));	
+			System.out.println("Probability:" + out.get(o) + " - " + out.get(m));
+		}
 		return labels[o].charAt(0);
 	}
 
