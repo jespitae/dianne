@@ -149,7 +149,10 @@ public class DianneGenerationCommands {
 		}
 		
 		int m = 0;
+		double[] distribution = new double[out.size()];
+		distribution[0] = out.get(0);
 		for(int i = 1; i < out.size(); i++) {
+			distribution[i] = out.get(i);
 			if(out.get(m) < out.get(i)) {
 				m = i;
 			}
@@ -160,11 +163,20 @@ public class DianneGenerationCommands {
 		while (o < out.size() && (s += out.get(o)) < r) {
 			o++;
 		}
+		
+		if(out.get(o) < 0.1) {
+			o = m;
+		}
 
 		if(labels[o].charAt(0) != labels[m].charAt(0)) {
-			System.out.println("Characters:" + labels[o].charAt(0) + " - " + labels[m].charAt(0));	
+			System.out.println("Characters:" + labels[o].charAt(0) + " instead of " + labels[m].charAt(0));	
 			System.out.println("Probability:" + out.get(o) + " - " + out.get(m));
+			for(int i = 0; i < distribution.length - 1; i++) {
+				System.out.print(labels[i].charAt(0) + ": " + distribution[i] + ", ");
+			}
+			System.out.println(distribution[distribution.length - 1]);
 		}
+		
 		return labels[o].charAt(0);
 	}
 
