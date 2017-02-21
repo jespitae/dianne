@@ -52,8 +52,8 @@ import be.iminds.iot.dianne.tensor.TensorOps;
 		immediate=true,
 		property={"aiolos.unique=true","aiolos.combine=*"},
 		configurationPolicy=ConfigurationPolicy.REQUIRE,
-		configurationPid="be.iminds.iot.dianne.dataset.MarioSequencesDataset")
-public class MarioSequencesDataset extends AbstractDataset implements SequenceDataset<Sample, Batch> {
+		configurationPid="be.iminds.iot.dianne.dataset.MarioSequencesDifficultyDataset")
+public class MarioSequencesDifficultyDataset extends AbstractDataset implements SequenceDataset<Sample, Batch> {
 
 	private String[] files = {"mario-1-1.txt", "mario-1-2.txt", "mario-1-3.txt", "mario-2-1.txt", "mario-3-3.txt", 
 			"mario-4-1.txt", "mario-4-2.txt", "mario-5-3.txt", "mario-6-1.txt", "mario-6-2.txt", "mario-6-3.txt", "mario-8-1.txt",
@@ -61,7 +61,17 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 			, "SuperMarioBros2(J)-World2-2.txt", "SuperMarioBros2(J)-World2-3.txt", "SuperMarioBros2(J)-World3-3.txt"
 			, "SuperMarioBros2(J)-World4-1.txt", "SuperMarioBros2(J)-World4-3.txt", "SuperMarioBros2(J)-World5-2.txt"
 			, "SuperMarioBros2(J)-World6-3.txt", "SuperMarioBros2(J)-WorldA-3.txt", "SuperMarioBros2(J)-WorldB-3.txt"};
-		
+	
+	private enum Difficulty {
+		LOW, MEDIUM, HIGH;
+	}
+	
+	private Difficulty[] difficulties = {Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, 
+			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW,
+			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW,
+			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW,
+			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW};
+	
 	private String[] data;
 	private String allData = "";
 	private String chars = "";
@@ -187,6 +197,29 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 		return t;
 	}
 	
+	private Tensor asTensor(char c, Tensor t, int sequence){
+		int index = 0;
+		index = chars.indexOf(c);
+		if(t == null)
+			t = new Tensor(chars.length() + 3);
+		t.fill(0.0f);
+		if(index == -1) {
+			System.err.println("Character "+c+" is not in the vocabulary");
+			return t;
+		}
+		t.set(1.0f, index);
+		if(difficulties[sequence] == Difficulty.LOW) {
+			t.set(1.0f, chars.length());
+		} else { 
+			if(difficulties[sequence] == Difficulty.MEDIUM) {
+				t.set(1.0f, chars.length() + 1);
+			} else {
+				t.set(1.0f, chars.length() + 2);
+			}
+		}
+		return t;
+	}
+	
 	private char asChar(Tensor t){
 		int index = TensorOps.argmax(t);
 		return chars.charAt(index);
@@ -291,7 +324,7 @@ public class MarioSequencesDataset extends AbstractDataset implements SequenceDa
 		for(int i=0;i<length;i++){
 			Batch batch;
 			if(b.size() <= i){
-				batch = new Batch(previous != null ? previous.target : new Tensor(sequences.length, chars.length()), new Tensor(sequences.length, chars.length()));
+				batch = new Batch(previous != null ? previous.target : new Tensor(sequences.length, chars.length() + 3), new Tensor(sequences.length, chars.length() + 3));
 				b.add(batch);
 			} else {
 				batch = b.get(i);
