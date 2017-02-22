@@ -62,15 +62,16 @@ public class MarioSequencesDifficultyDataset extends AbstractDataset implements 
 			, "SuperMarioBros2(J)-World4-1.txt", "SuperMarioBros2(J)-World4-3.txt", "SuperMarioBros2(J)-World5-2.txt"
 			, "SuperMarioBros2(J)-World6-3.txt", "SuperMarioBros2(J)-WorldA-3.txt", "SuperMarioBros2(J)-WorldB-3.txt"};
 	
-	private enum Difficulty {
-		LOW, MEDIUM, HIGH;
-	}
-	
-	private Difficulty[] difficulties = {Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, 
-			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW,
-			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW,
-			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW,
-			Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW, Difficulty.LOW};
+	private int[] difficulties = {0, 0, 0, 0, 
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 
+			0, 0, 0, 0, 0, 
+			0, 0, 0, 0, 0, 
+			0, 0, 0, 0, 0, 
+			0, 0, 0, 0};
 	
 	private String[] data;
 	private String allData = "";
@@ -208,15 +209,7 @@ public class MarioSequencesDifficultyDataset extends AbstractDataset implements 
 			return t;
 		}
 		t.set(1.0f, index);
-		if(difficulties[sequence] == Difficulty.LOW) {
-			t.set(1.0f, chars.length());
-		} else { 
-			if(difficulties[sequence] == Difficulty.MEDIUM) {
-				t.set(1.0f, chars.length() + 1);
-			} else {
-				t.set(1.0f, chars.length() + 2);
-			}
-		}
+		t.set(1.0f, chars.length() + difficulties[sequence]);
 		return t;
 	}
 	
@@ -339,12 +332,12 @@ public class MarioSequencesDifficultyDataset extends AbstractDataset implements 
 				
 				if(i == 0){
 					char c = data[sequences[s]].charAt(k);
-					asTensor(c, batch.getSample(s).input);
+					asTensor(c, batch.getSample(s).input, sequences[s]);
 				} 
 				
 				if(k+1 < data[sequences[s]].length()){
 					char c = data[sequences[s]].charAt(k+1);
-					asTensor(c, batch.getSample(s).target);
+					asTensor(c, batch.getSample(s).target, sequences[s]);
 				} else {
 					batch.getSample(s).target.fill(Float.NaN);
 				}
