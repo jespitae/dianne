@@ -62,16 +62,16 @@ public class MarioSequencesDifficultyDataset extends AbstractDataset implements 
 			, "SuperMarioBros2(J)-World4-1.txt", "SuperMarioBros2(J)-World4-3.txt", "SuperMarioBros2(J)-World5-2.txt"
 			, "SuperMarioBros2(J)-World6-3.txt", "SuperMarioBros2(J)-WorldA-3.txt", "SuperMarioBros2(J)-WorldB-3.txt"};
 	
-	private int[] difficulties = {0, 0, 0, 0, 
-			0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 
-			0, 0, 0, 0, 0, 
-			0, 0, 0, 0, 0, 
-			0, 0, 0, 0, 0, 
-			0, 0, 0, 0};
+	private int[] difficulties = {0, 0, 1, 1, 
+			1, 0, 1, 1, 1,
+			0, 1, 2, 0, 2, 
+			0, 1, 1, 2,	1,
+			2, 2, 2, 1,	2,
+			0, 0, 1, 1, 
+			1, 0, 1, 1, 1,
+			0, 1, 2, 0, 2, 
+			0, 1, 1, 2,	1,
+			2, 2, 2, 1,	2,};
 	
 	private String[] data;
 	private String allData = "";
