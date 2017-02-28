@@ -284,7 +284,7 @@ public class DianneGenerationCommands {
 				
 		double s = 0, r = Math.random();
 		int o = 0;
-		while (o < labels.length && (s += out.get(o)) < r) {
+		while (o < (labels.length - 1) && (s += out.get(o)) < r) {
 			o++;
 		}
 		
