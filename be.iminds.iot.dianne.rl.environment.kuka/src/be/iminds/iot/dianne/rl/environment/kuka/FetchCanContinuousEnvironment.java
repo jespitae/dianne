@@ -61,15 +61,20 @@ public class FetchCanContinuousEnvironment extends AbstractFetchCanEnvironment {
 
 	@Override
 	public int[] actionDims() {
-		return new int[]{3};
+		if(config.seperateMagnitude)
+			return new int[]{6};
+		else
+			return new int[]{3};
 	}
 	
 	@Override
 	protected void executeAction(Tensor a) throws Exception {
-		if(TensorOps.dot(a, a) < config.stopThreshold) {
+		Tensor v = getVelocities(a);
+		
+		if(TensorOps.dot(v, v) < config.stopThreshold) {
 			grip = true;
 			
-			kukaPlatform.stop();	
+			kukaPlatform.stop();
 
 			if(!super.config.earlyStop) {
 				Promise<Arm> result = kukaArm.openGripper()
@@ -100,8 +105,8 @@ public class FetchCanContinuousEnvironment extends AbstractFetchCanEnvironment {
 			
 			}
 		} else {
-			float[] action = a.get();
-			kukaPlatform.move(action[0]*super.config.speed, action[1]*super.config.speed, action[2]*super.config.speed*2);
+			float[] velocities = v.get();
+			kukaPlatform.move(velocities[0]*super.config.speed, velocities[1]*super.config.speed, velocities[2]*super.config.speed*2);
 		}
 	
 		// simulate an iteration further
@@ -110,6 +115,22 @@ public class FetchCanContinuousEnvironment extends AbstractFetchCanEnvironment {
 				simulator.tick();
 			}
 		}
+	}
+	
+	@Override
+	protected float calculateEnergy(Tensor a) {
+		Tensor v = getVelocities(a);
+		
+		return TensorOps.dot(v, v);
+	}
+	
+	protected Tensor getVelocities(Tensor a) {
+		if(a.size() == 6) {
+			Tensor temp = a.narrow(0, 0, 3);
+			a = TensorOps.cmul(temp, temp, a.narrow(0, 3, 3));
+		}
+		
+		return a;
 	}
 	
 	@Override

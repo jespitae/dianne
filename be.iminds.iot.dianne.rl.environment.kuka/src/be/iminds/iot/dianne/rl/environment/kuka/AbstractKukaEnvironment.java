@@ -159,7 +159,7 @@ public abstract class AbstractKukaEnvironment implements Environment, KukaEnviro
 		// calculate reward
 		try {
 			reward = calculateReward();
-			reward -= config.energyPenalization*TensorOps.dot(action, action);
+			reward -= config.energyPenalization*calculateEnergy(action);
 		} catch(Exception e){
 			throw new RuntimeException("Failed calculating reward");
 		}
@@ -222,6 +222,10 @@ public abstract class AbstractKukaEnvironment implements Environment, KukaEnviro
 	protected abstract void executeAction(Tensor a) throws Exception; 
 	
 	protected abstract float calculateReward() throws Exception;
+	
+	protected float calculateEnergy(Tensor a) throws Exception {
+		return 1;
+	}
 	
 	protected abstract void initSimulator() throws Exception;
 	
@@ -338,6 +342,10 @@ public abstract class AbstractKukaEnvironment implements Environment, KukaEnviro
 	private void deinit(){
 		if(simulator != null){
 			simulator.stop();
+			// TODO wait until simulation has completely stopped (use function call from remote api?)
+			try {
+				Thread.sleep(config.wait);
+			} catch (InterruptedException e) {}
 		}
 	}
 	

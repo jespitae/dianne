@@ -63,41 +63,40 @@ public abstract class AbstractFetchCanEnvironment extends AbstractKukaEnvironmen
 		
 		// calculate reward based on simulator info
 		if(simulator != null){
-			
-			// in case of collision, reward -1
-			// in case of succesful grip, reward 1, insuccesful grip, -1
-			// else, reward between 0 and 0.5 as one gets closer to the optimal grip point
-			if(simulator.checkCollisions("Border")){
-				return -1.0f;
-			}
-	
 			Position d = simulator.getPosition("Can1", "youBot");
+			
+			// if collision or can is too close
+			if(simulator.checkCollisions("Border") || Math.abs(d.y) < 0.23 && Math.abs(d.z) < 0.37){
+				if (config.collisionTerminal) {
+					terminal = true;
+					count = 0;
+				} else {
+					return -1.0f;
+				}
+			}
 			
 			// calculate distance of youBot relative to can
 			float dx = d.y;
 			float dy = d.z - GRIP_DISTANCE;
-	
-			// if can is too close, give same reward as collision
-			if(Math.abs(d.y) < 0.23 && Math.abs(d.z) < 0.37){
-				return -1.0f;
-			}
 			
 			// dy should come close to 0.565 for succesful grip
 			// dx should come close to 0
-			float d2 = dx*dx + dy*dy;
-			float distance = (float)Math.sqrt(d2);
+			// hypot = Math.sqrt(dx*dx+dy*dy) without under and overflow
+			float distance = (float)Math.hypot(dx,dy);
 			
+			// max reward in radius of can by setting the distance to 0
+			if(distance <= config.margin)
+				distance = 0.0f;
 			
 			// if grip give reward according to position relative to can
 			if(grip){
 				if(config.earlyStop){
 					// use position only
-					if(Math.abs(dx) <= config.margin
-						&& Math.abs(dy) <= config.margin){
+					if(distance <= config.margin){
 						// succesful grip, mark as terminal
 						terminal = true;
 						count = 0;
-						return 1.0f;
+						return 1.0f * config.gripRewardScale;
 					} 
 				} else {
 					// simulate actual grip action
@@ -105,7 +104,7 @@ public abstract class AbstractFetchCanEnvironment extends AbstractKukaEnvironmen
 						// can is lifted, reward 1 and mark as terminal
 						terminal = true;
 						count = 0;
-						return 1.0f;
+						return 1.0f * config.gripRewardScale;
 					} 
 				}
 				
@@ -113,28 +112,35 @@ public abstract class AbstractFetchCanEnvironment extends AbstractKukaEnvironmen
 				
 				// punish wrong gripping?
 				if(config.punishWrongGrip)
-					return -1.0f;
+					return -1.0f * config.gripRewardScale;
 			}
 			
 			// also give intermediate reward for each action?
 			if(config.intermediateReward){
+				float r;
 				if(config.relativeReward){
 					// give +1 if closer -1 if further
-					float r = previousDistance - distance;
+					r = previousDistance - distance;
 					if(config.discreteReward){
 						r = r > EPSILON ? 1 : r < -EPSILON ? -1 : 0;
 					} else {
 						// boost it a bit
 						r *= config.relativeRewardScale/(config.skip+1);
 					}
-					previousDistance = distance;
-					return r;
 				} else {
-					// just give negative relative distance as value
-					float r = - previousDistance / MAX_DISTANCE;
-					previousDistance = distance;
-					return r;
+					// linear or exponential decaying reward function
+					if (config.exponentialDecayingReward)
+						// wolfram function: plot expm1(-a*x) + b with a=2.5 and b=1 for x = 0..2.4
+						// where x: previousDistance, a: absoluteRewardScale, b: maxReward and expm1 =  e^x -1
+						r = ((float)Math.expm1( -config.exponentialDecayingRewardScale * previousDistance));
+					else {
+						r = - previousDistance / MAX_DISTANCE;
+					}
+					// reward offset
+					r += config.maxReward;
 				}
+				previousDistance = distance;
+				return r;
 			} else {
 				return 0.0f;
 			}
@@ -183,7 +189,6 @@ public abstract class AbstractFetchCanEnvironment extends AbstractKukaEnvironmen
 	
 	public void resetYoubot(){
 		float x,y,o;
-		Position p = simulator.getPosition("youBot");
 		
 		if(config.difficulty <= 1){
 			x = 0;
@@ -194,10 +199,7 @@ public abstract class AbstractFetchCanEnvironment extends AbstractKukaEnvironmen
 			y = (r.nextFloat()-0.5f)*1.8f;
 			o = (r.nextFloat()-0.5f)*6.28f;
 		}
-		// somehow two times setPosition was required to actually get the position set
-		// TODO check in VREP simulator source?
-		simulator.setPosition("youBot", new Position(x, y, p.z));
-		simulator.setPosition("youBot", new Position(x, y, p.z));
+		simulator.setPosition("youBot", new Position(x, y, 0.0957f));
 		simulator.setOrientation("youBot", new Orientation(-1.5707963f, o, -1.5707965f));
 	}
 	
@@ -206,13 +208,16 @@ public abstract class AbstractFetchCanEnvironment extends AbstractKukaEnvironmen
 		
 		// set random can position
 		float s = 0;
-		while(s < 0.15f) { // can should not be colliding with youbot from start
-			if(config.difficulty == 0){
+		while(s < 0.15f) { // can should not be colliding with youbot from start	
+			if(config.difficulty <= 0){
 				x = 0;
 			} else {
 				x = (r.nextFloat()-0.5f)*1.6f;
 			}
 			
+			if(config.difficulty < 0) {
+				y = MAX_DISTANCE/3;
+			} else
 			if(config.difficulty <= 1){
 				y = (0.125f + 3*r.nextFloat()/8f)*2.4f;
 			} else {
