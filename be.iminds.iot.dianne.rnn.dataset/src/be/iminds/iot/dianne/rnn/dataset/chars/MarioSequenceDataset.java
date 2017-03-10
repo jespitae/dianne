@@ -168,7 +168,7 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 	protected Tensor getTargetSample(Tensor t, int index) {
 		return asTensor(allData.charAt(index+1), t);
 	}
-
+	
 	private Tensor asTensor(char c, Tensor t){
 		int index = 0;
 		index = chars.indexOf(c);
@@ -200,7 +200,17 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 		}
 		return data[index].length();
 	}
-
+	
+	@Override
+	public char getChar(int sequence, int index) {
+		return data[sequence].charAt(index);
+	}
+	
+	@Override
+	public int getIndex(char c) {
+		return chars.indexOf(c);
+	}
+		
 	@Override
 	public Sequence<Sample> getSequence(Sequence<Sample> seq, int sequence, int index, int length) {
 		if(seq == null){
