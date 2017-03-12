@@ -42,6 +42,7 @@ import be.iminds.iot.dianne.nn.util.DianneConfigHandler;
 import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingFactory;
 import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingStrategy;
 import be.iminds.iot.dianne.rnn.learn.strategy.config.GenerativeAdverserialSequenceConfig;
+import be.iminds.iot.dianne.tensor.ModuleOps;
 import be.iminds.iot.dianne.tensor.Tensor;
 import be.iminds.iot.dianne.tensor.TensorOps;
 
@@ -70,13 +71,16 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	
 	protected SequenceSamplingStrategy sampling;
 	
-	protected Sequence<Batch> sequence = null;
+	protected Sequence<Batch> sequence;
 	
 	protected Tensor target;
+	
+	protected int temperature;
 	
 	@Override
 	public void setup(Map<String, String> config, Dataset dataset, NeuralNetwork... nns) throws Exception {
 		this.dataset = (SequenceDataset) dataset;
+		this.temperature = 5;
 		
 		this.generator = nns[0];
 		this.discriminator = nns[1];
@@ -96,9 +100,17 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 
 	@Override
 	public LearnProgress processIteration(long i) throws Exception {
+		//Anneal temperature
+		if(i != 1 && (i % 500) == 0) {
+			i--;
+		}		
+		
 		// Clear delta params
 		generator.zeroDeltaParameters();
 		discriminator.zeroDeltaParameters();
+		
+		generator.resetMemory(config.batchSize);
+		discriminator.resetMemory(config.batchSize);
 		
 		// sample sequence
 		int[] sequences = sampling.sequence(config.batchSize);
@@ -122,11 +134,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		// these should be classified as incorrect by discriminator
 		target.fill(0.15f);
 		sequence.data.clear();		
-
-		sequences = sampling.sequence(config.batchSize);
-		indexes = sampling.next(sequences, config.sequenceLength);
 		
-		fillSequence(sequences, indexes);
+		fillSequence();
 				
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
@@ -144,19 +153,14 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		// This should be classified correct by discriminator to get the gradient improving the generator
 		target.fill(0.85f);
 		sequence.data.clear();		
-
-		sequences = sampling.sequence(config.batchSize);
-		indexes = sampling.next(sequences, config.sequenceLength);
 		
-		fillSequence(sequences, indexes);
+		fillSequence();
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		
 		float g_loss = TensorOps.mean(criterion.loss(output, target));
 		gradOutput = criterion.grad(output, target);
 		Tensor gradInput = discriminator.backward(gradOutput);
-		
-		//Gumbel Softmax
-		
+				
 		generator.backward(gradInput);
 		
 		// Update generator weights
@@ -171,46 +175,44 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		return new GenerativeAdverserialLearnProgress(i, d_loss_positive, d_loss_negative, g_loss);
 	}
 
-	private void fillSequence(int[] sequences, int[] indexes) {				
-		Batch start = new Batch(new Tensor(config.batchSize, dataset.getLabels().length), new Tensor(config.batchSize, dataset.getLabels().length));
+	private void fillSequence() {				
+		Batch start = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
 		for(int b = 0; b < config.batchSize; b++) {
-			start.getInput(b).fill(0.0f);
-			start.getInput(b).set(1.0f,dataset.getIndex(dataset.getChar(sequences[b], indexes[b])));
-			Tensor out = generator.forward(start.getInput(b));
-			
-			// select next, sampling from (Log)Softmax output
-			if (TensorOps.min(out) < 0) {
-				// assume logsoftmax output, take exp
-				out = TensorOps.exp(out, out);
-			}
-			double index = 0, r = Math.random();
-			int o = 0;
-			while (o < out.size() && (index += out.get(o)) < r) {
-				o++;
-			}
-			start.getTarget(b).fill(0.0f);
-			start.getTarget(b).set(1.0f, o);
+			start.getInput(b).randn();
+			start.getInput().set(gumbelSoftmax(start.getInput(b)).get());
+			Tensor out = generator.forward(start.getInput(b));			
+			start.getTarget(b).set(gumbelSoftmax(out).get());
 		}
 		sequence.data.add(start);
 		for(int s = 1; s < config.sequenceLength; s++) {
-			Batch batch = new Batch(new Tensor(config.batchSize, dataset.getLabels().length), new Tensor(config.batchSize, dataset.getLabels().length));
+			Batch batch = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
 			for(int b = 0; b < config.batchSize; b++) {
-				Tensor out = generator.forward(sequence.data.get(s - 1).getInput(b));
-				
-				// select next, sampling from (Log)Softmax output
-				if (TensorOps.min(out) < 0) {
-					// assume logsoftmax output, take exp
-					out = TensorOps.exp(out, out);
-				}
-				double index = 0, r = Math.random();
-				int o = 0;
-				while (o < out.size() && (index += out.get(o)) < r) {
-					o++;
-				}
-				batch.getTarget(b).fill(0.0f);
-				batch.getTarget(b).set(1.0f, o);
+				batch.getInput(b).set(sequence.data.get(s - 1).getTarget(b).get());
+				Tensor out = generator.forward(batch.getInput(b));				
+				batch.getTarget(b).set(gumbelSoftmax(out).get());
 			}
 			sequence.data.add(batch);
 		}
+	}
+		
+	//Create gumbel-softmax sample
+	private Tensor gumbelSoftmax(Tensor tensor) {
+		Tensor gumbelSample = new Tensor(config.generatorDim);
+		gumbelSample.rand();
+		float epsilon = (float) (1f * Math.pow(10,-20));
+		
+		//Calculate gumbel sample
+		TensorOps.add(gumbelSample, gumbelSample, epsilon);
+		TensorOps.log(gumbelSample, gumbelSample);
+		TensorOps.mul(gumbelSample, gumbelSample, -1f);
+		TensorOps.add(gumbelSample, gumbelSample, epsilon);
+		TensorOps.log(gumbelSample, gumbelSample);
+		TensorOps.mul(gumbelSample, gumbelSample, -1f);
+		
+		//Calculate gumbel-softmax sample
+		TensorOps.add(tensor, tensor, gumbelSample);
+		TensorOps.div(tensor, tensor, temperature);
+		ModuleOps.softmax(tensor, tensor);
+		return tensor;
 	}
 }

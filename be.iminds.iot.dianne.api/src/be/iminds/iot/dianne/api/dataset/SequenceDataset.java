@@ -46,22 +46,7 @@ public interface SequenceDataset<S extends Sample, B extends Batch> extends Data
 	 * @return size of the sequence
 	 */
 	public int sequenceLength(int sequence);
-	
-	/**
-	 * Get the length of a sequence
-	 * @param sequence index
-	 * @param index
-	 * @return char at index in sequence
-	 */
-	public char getChar(int sequence, int index);
-	
-	/**
-	 * Get the length of a sequence
-	 * @param char
-	 * @return index of char
-	 */
-	public int getIndex(char c);
-		
+				
 	/**
 	 * Get a (part of) a sequence with start index and length
 	 * @param s provided sequence to copy the data into, will be created in case of null or elements will be added if s.size() < length

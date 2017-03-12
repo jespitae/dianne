@@ -201,12 +201,10 @@ public class MarioSequenceDataset extends AbstractDataset implements SequenceDat
 		return data[index].length();
 	}
 	
-	@Override
 	public char getChar(int sequence, int index) {
 		return data[sequence].charAt(index);
 	}
 	
-	@Override
 	public int getIndex(char c) {
 		return chars.indexOf(c);
 	}

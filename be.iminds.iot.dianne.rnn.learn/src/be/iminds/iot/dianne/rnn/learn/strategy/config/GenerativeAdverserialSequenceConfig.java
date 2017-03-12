@@ -52,4 +52,9 @@ public class GenerativeAdverserialSequenceConfig {
 	 *  * Sequential
 	 */
 	public SamplingConfig sampling = SamplingConfig.UNIFORM;
+	
+	/**
+	 * Dimension of the generator.
+	 */
+	public int generatorDim;
 }
