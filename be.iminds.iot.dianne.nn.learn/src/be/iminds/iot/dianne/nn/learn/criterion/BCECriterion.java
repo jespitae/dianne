@@ -72,7 +72,6 @@ public class BCECriterion implements Criterion {
 		
 		l = TensorOps.cmul(l, target, logOut);
 		TensorOps.addcmul(l, l, 1, invTar, logInvOut);
-		
 		if(b.batchSize > 1){
 			loss.reshape(b.batchSize);
 			for(int i=0;i<b.batchSize;i++){

@@ -122,7 +122,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		sequence = dataset.getBatchedSequence(sequence, sequences, indexes, config.sequenceLength);
 		// These should be classified as correct by discriminator
 		target.fill(0.85f);
-		
+		target.reshape(config.batchSize, 1);
 		Tensor output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_positive = TensorOps.mean(criterion.loss(output, target));
 		Tensor gradOutput = criterion.grad(output, target);
@@ -178,8 +178,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	private void fillSequence() {				
 		Batch start = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
 		for(int b = 0; b < config.batchSize; b++) {
-			start.getInput(b).randn();
-			start.getInput().set(gumbelSoftmax(start.getInput(b)).get());
+			start.getInput(b).randn();			
+			start.getInput(b).set(gumbelSoftmax(start.getInput(b)).get());
 			Tensor out = generator.forward(start.getInput(b));			
 			start.getTarget(b).set(gumbelSoftmax(out).get());
 		}

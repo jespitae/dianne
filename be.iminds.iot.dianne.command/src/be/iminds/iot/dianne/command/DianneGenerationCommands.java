@@ -207,6 +207,7 @@ public class DianneGenerationCommands {
 					"Neural network " + nn.getNeuralNetworkInstance().name + " is not trained and has no labels");
 		}
 		Tensor in = new Tensor(labels.length);
+		
 		in.fill(0.0f);
 		int index = 0;
 		for (int i = 0; i < labels.length; i++) {
@@ -216,7 +217,6 @@ public class DianneGenerationCommands {
 			}
 		}
 		in.set(1.0f, index);
-
 		// forward
 		Tensor out = nn.forward(in);
 
