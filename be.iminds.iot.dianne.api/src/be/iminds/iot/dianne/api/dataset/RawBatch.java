@@ -20,41 +20,42 @@
  * Contributors:
  *     Tim Verbelen, Steven Bohez
  *******************************************************************************/
-package be.iminds.iot.dianne.nn.learn.sampling;
+package be.iminds.iot.dianne.api.dataset;
 
-import be.iminds.iot.dianne.api.dataset.Dataset;
-import be.iminds.iot.dianne.api.nn.learn.SamplingStrategy;
+import be.iminds.iot.dianne.tensor.Tensor;
 
-public class SequentialSamplingStrategy implements SamplingStrategy {
-
-	private int index;
-
-	private final Dataset dataset;
+/**
+ * A helper class for representing raw dataset data
+ * 
+ * This can be used to tansfer dataset data from a remote dataset 
+ * without creating precious native tensors all the time.
+ * 
+ * @author tverbele
+ *
+ */
+public class RawBatch {
 	
-	public SequentialSamplingStrategy(Dataset dataset) {
-		this.dataset = dataset;
-		this.index = 0;
+	public int[] inputDims;
+	public float[] input;
+	
+	public int[] targetDims;
+	public float[] target;
+	
+	public RawBatch(int[] inputDims, float[] input, int[] targetDims, float[] target){
+		this.inputDims = inputDims;
+		this.input = input;
+		this.targetDims = targetDims;
+		this.target = target;
 	}
 	
-	@Override
-	public int next() {
-		if(index >= dataset.size()){
-			index = 0;
+	public Batch copyInto(Batch b){
+		if(b == null){
+			return new Batch(new Tensor(input, inputDims), new Tensor(target, targetDims));
+		} else {
+			b.input.set(input);
+			b.target.set(target);
+			return b;
 		}
-		return index++;
 	}
-
-	@Override
-	public int[] next(int count){
-		int[] indices = new int[count];
-		int size = dataset.size();
-		for(int i=0;i<count;i++){
-			if(index >= size){
-				indices[i] = 0;
-			} else {
-				indices[i] = index++;
-			}
-		}
-		return indices;
-	}
+	
 }

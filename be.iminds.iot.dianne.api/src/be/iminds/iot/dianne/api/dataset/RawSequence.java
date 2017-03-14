@@ -20,41 +20,40 @@
  * Contributors:
  *     Tim Verbelen, Steven Bohez
  *******************************************************************************/
-package be.iminds.iot.dianne.nn.learn.sampling;
+package be.iminds.iot.dianne.api.dataset;
 
-import be.iminds.iot.dianne.api.dataset.Dataset;
-import be.iminds.iot.dianne.api.nn.learn.SamplingStrategy;
+import java.util.ArrayList;
+import java.util.List;
 
-public class SequentialSamplingStrategy implements SamplingStrategy {
+/**
+ * A helper class for representing raw data of sequence of samples/batches of a dataset.
+ * 
+ * This can be used to tansfer dataset data from a remote dataset 
+ * without creating precious native tensors all the time.
+ * 
+ * @author tverbele
+ *
+ */
+public class RawSequence {
 
-	private int index;
-
-	private final Dataset dataset;
+	public List<RawSample> data;
 	
-	public SequentialSamplingStrategy(Dataset dataset) {
-		this.dataset = dataset;
-		this.index = 0;
-	}
-	
-	@Override
-	public int next() {
-		if(index >= dataset.size()){
-			index = 0;
-		}
-		return index++;
+	public RawSequence(List<RawSample> data){
+		this.data = data;
 	}
 
-	@Override
-	public int[] next(int count){
-		int[] indices = new int[count];
-		int size = dataset.size();
-		for(int i=0;i<count;i++){
-			if(index >= size){
-				indices[i] = 0;
-			} else {
-				indices[i] = index++;
+	public Sequence<Sample> copyInto(Sequence<Sample> s){
+		if(s == null){
+			List<Sample> d = new ArrayList<>();
+			for(RawSample rs : data){
+				d.add(rs.copyInto(null));
 			}
+			return new Sequence<>(d);
+		} else {
+			for(int i=0;i<data.size();i++){
+				data.get(i).copyInto(s.data.get(i));
+			}
+			return s;
 		}
-		return indices;
 	}
 }

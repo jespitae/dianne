@@ -58,6 +58,7 @@ import be.iminds.iot.dianne.nn.module.join.Multiply;
 import be.iminds.iot.dianne.nn.module.layer.AvgPooling;
 import be.iminds.iot.dianne.nn.module.layer.Convolution;
 import be.iminds.iot.dianne.nn.module.layer.FullConvolution;
+import be.iminds.iot.dianne.nn.module.layer.Invert;
 import be.iminds.iot.dianne.nn.module.layer.Linear;
 import be.iminds.iot.dianne.nn.module.layer.MaskedMaxPooling;
 import be.iminds.iot.dianne.nn.module.layer.MaxPooling;
@@ -85,22 +86,22 @@ public class DianneModuleFactory implements ModuleFactory {
 	void activate(){
 		// build list of supported modules
 		// TODO use reflection for this?
-		addSupportedType( new ModuleTypeDTO("Multivariate Gaussian", "Variational", true, 
+		addSupportedType( new ModuleTypeDTO("Multivariate Gaussian", "Variational", false, 
 				new ModulePropertyDTO("Size", "size", Integer.class.getName()),
 				new ModulePropertyDTO("Mean Activation", "meanActivation", String.class.getName()),
 				new ModulePropertyDTO("Stdev Activation", "stdevActivation", String.class.getName())));
 		
-		addSupportedType( new ModuleTypeDTO("Gaussian Sampler", "Variational", true, 
+		addSupportedType( new ModuleTypeDTO("Gaussian Sampler", "Variational", false, 
 				new ModulePropertyDTO("Size", "size", Integer.class.getName())));
 		
 		
 		addSupportedType( new ModuleTypeDTO("BatchNormalization", "Regularization", true, 
 				new ModulePropertyDTO("Size", "size", Integer.class.getName())));
 		
-		addSupportedType( new ModuleTypeDTO("Dropout", "Regularization", true, 
+		addSupportedType( new ModuleTypeDTO("Dropout", "Regularization", false, 
 				new ModulePropertyDTO("Dropout rate", "rate", Float.class.getName())));
 
-		addSupportedType( new ModuleTypeDTO("DropPath", "Regularization", true, 
+		addSupportedType( new ModuleTypeDTO("DropPath", "Regularization", false, 
 				new ModulePropertyDTO("DropPath rate", "rate", Float.class.getName())));
 		
 		addSupportedType( new ModuleTypeDTO("Linear", "Layer", true, 
@@ -247,6 +248,7 @@ public class DianneModuleFactory implements ModuleFactory {
 				new ModulePropertyDTO("Inputs", "noInputs", Integer.class.getName()),
 				new ModulePropertyDTO("Masks", "masks", String.class.getName())));
 
+		addSupportedType(new ModuleTypeDTO("Invert", "Layer", false));
 	}
 	
 	
@@ -706,6 +708,11 @@ public class DianneModuleFactory implements ModuleFactory {
 		{
 			int size = Integer.parseInt(dto.properties.get("size"));
 			module = new GaussianSampler(id, size);
+			break;
+		}
+		case "Invert":
+		{
+			module = new Invert(id);
 			break;
 		}
 		default:

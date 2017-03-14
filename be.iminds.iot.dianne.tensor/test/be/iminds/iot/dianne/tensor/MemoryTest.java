@@ -20,41 +20,42 @@
  * Contributors:
  *     Tim Verbelen, Steven Bohez
  *******************************************************************************/
-package be.iminds.iot.dianne.nn.learn.sampling;
+package be.iminds.iot.dianne.tensor;
 
-import be.iminds.iot.dianne.api.dataset.Dataset;
-import be.iminds.iot.dianne.api.nn.learn.SamplingStrategy;
+import java.util.ArrayList;
+import java.util.List;
 
-public class SequentialSamplingStrategy implements SamplingStrategy {
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-	private int index;
+// small test for checking whether GC callbacks work...
+public class MemoryTest {
 
-	private final Dataset dataset;
-	
-	public SequentialSamplingStrategy(Dataset dataset) {
-		this.dataset = dataset;
-		this.index = 0;
+	@BeforeClass
+	public static void load() {
+		NativeTensorLoader loader = new NativeTensorLoader();
+		loader.activate(null);
 	}
 	
-	@Override
-	public int next() {
-		if(index >= dataset.size()){
-			index = 0;
-		}
-		return index++;
-	}
-
-	@Override
-	public int[] next(int count){
-		int[] indices = new int[count];
-		int size = dataset.size();
-		for(int i=0;i<count;i++){
-			if(index >= size){
-				indices[i] = 0;
-			} else {
-				indices[i] = index++;
+	@Test
+	public void testGC() throws InterruptedException{
+		List<Tensor> keep = new ArrayList<>();
+		Thread t = new Thread(()->{
+			
+			for(int i=0;i<1024;i++){
+				// Use tensors of about 1MB each
+				Tensor t1 = new Tensor(1024*1024/4);
+				t1.fill(1.0f);
+				
+				Tensor t2 = new Tensor(1024*1024/4);
+				t2.fill(1.0f);
+				
+				Tensor res = TensorOps.add(null, t1, t2);
+				keep.add(res);
 			}
-		}
-		return indices;
+		});
+		t.start();
+		t.join();
 	}
+
 }

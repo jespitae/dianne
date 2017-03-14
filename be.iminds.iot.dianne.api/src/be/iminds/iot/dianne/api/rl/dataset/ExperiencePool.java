@@ -78,6 +78,12 @@ public interface ExperiencePool extends SequenceDataset<ExperiencePoolSample, Ex
 	
 	ExperiencePoolSample getSample(ExperiencePoolSample s, final int index);
 
+	default RawExperiencePoolSample getRawSample(final int index){
+		ExperiencePoolSample s = getSample(index);
+		return new RawExperiencePoolSample(s.input.dims(), s.target.dims(), 
+				s.input.get(), s.target.get(), s.nextState.get(), s.reward.get(), s.terminal.get());
+	}
+	
 	/**
 	 * Get a batch from the experience pool. 
 	 * 
@@ -90,32 +96,19 @@ public interface ExperiencePool extends SequenceDataset<ExperiencePoolSample, Ex
 	
 	ExperiencePoolBatch getBatch(ExperiencePoolBatch b, final int...indices);
 	
-
+	default RawExperiencePoolBatch getRawBatch(final int... indices){
+		ExperiencePoolBatch b = getBatch(indices);
+		return new RawExperiencePoolBatch(b.input.dims(), b.target.dims(), 
+				b.input.get(), b.target.get(), b.nextState.get(), b.reward.get(), b.terminal.get());
+	}
+	
 	/**
 	 * Add a new sequence of interactions to the experience pool
 	 * 
 	 * @param sequence the sequence of samples to add
 	 */
 	void addSequence(Sequence<ExperiencePoolSample> sequence);
-	
-	/**
-	 * Remove a sequence from the experience pool
-	 * 
-	 * @param sequence
-	 */
-	void removeSequence(final int sequence);
-	
-	/**
-	 * Remove and get a sequence from the dataset
-	 * @param s list to store the sequence into
-	 * @param sequence sequence to get and remove
-	 */
-	Sequence<ExperiencePoolSample> removeAndGetSequence(Sequence<ExperiencePoolSample> s, final int sequence);
 
-	default Sequence<ExperiencePoolSample> removeAndGetSequence(final int sequence){
-		return removeAndGetSequence(null, sequence);
-	}
-	
 	
 	/**
 	 * Remove all samples from the experience pool

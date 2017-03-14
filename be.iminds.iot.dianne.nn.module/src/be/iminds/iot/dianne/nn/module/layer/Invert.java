@@ -20,41 +20,36 @@
  * Contributors:
  *     Tim Verbelen, Steven Bohez
  *******************************************************************************/
-package be.iminds.iot.dianne.nn.learn.sampling;
+package be.iminds.iot.dianne.nn.module.layer;
 
-import be.iminds.iot.dianne.api.dataset.Dataset;
-import be.iminds.iot.dianne.api.nn.learn.SamplingStrategy;
+import java.util.UUID;
 
-public class SequentialSamplingStrategy implements SamplingStrategy {
+import be.iminds.iot.dianne.api.nn.module.AbstractModule;
+import be.iminds.iot.dianne.tensor.Tensor;
+import be.iminds.iot.dianne.tensor.TensorOps;
 
-	private int index;
+public class Invert extends AbstractModule {
 
-	private final Dataset dataset;
-	
-	public SequentialSamplingStrategy(Dataset dataset) {
-		this.dataset = dataset;
-		this.index = 0;
+	public Invert(){
+		super();
 	}
 	
-	@Override
-	public int next() {
-		if(index >= dataset.size()){
-			index = 0;
-		}
-		return index++;
+	public Invert(UUID id){
+		super(id);
 	}
 
 	@Override
-	public int[] next(int count){
-		int[] indices = new int[count];
-		int size = dataset.size();
-		for(int i=0;i<count;i++){
-			if(index >= size){
-				indices[i] = 0;
-			} else {
-				indices[i] = index++;
-			}
+	protected void forward() {
+		if(output==null || !output.sameDim(input)){
+			output = new Tensor(input.dims());
 		}
-		return indices;
+		output.fill(1.0f);
+		TensorOps.sub(output, output, input);
 	}
+
+	@Override
+	protected void backward() {
+		gradInput = TensorOps.mul(gradInput, gradOutput, -1.0f);
+	}
+
 }

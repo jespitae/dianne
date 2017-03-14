@@ -18,43 +18,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Contributors:
- *     Tim Verbelen, Steven Bohez
+ *     Tim Verbelen, Steven Bohez, Elias De Coninck
  *******************************************************************************/
-package be.iminds.iot.dianne.nn.learn.sampling;
+package be.iminds.iot.dianne.nn.module.layer;
 
-import be.iminds.iot.dianne.api.dataset.Dataset;
-import be.iminds.iot.dianne.api.nn.learn.SamplingStrategy;
+import org.junit.Test;
 
-public class SequentialSamplingStrategy implements SamplingStrategy {
+import be.iminds.iot.dianne.nn.module.ModuleTest;
+import be.iminds.iot.dianne.tensor.Tensor;
 
-	private int index;
+public class InvertTest extends ModuleTest{
 
-	private final Dataset dataset;
-	
-	public SequentialSamplingStrategy(Dataset dataset) {
-		this.dataset = dataset;
-		this.index = 0;
+	@Test
+	public void testInvert() throws InterruptedException {
+		Invert i = new Invert();
+		
+		Tensor input = new Tensor(new float[]{0.1f, 0.2f, 0.3f, 0.4f}, 4);
+		
+		Tensor gradOutput = new Tensor(4);
+		gradOutput.fill(1.0f);
+
+		Tensor expOutput = new Tensor(new float[]{0.9f, 0.8f, 0.7f, 0.6f}, 4);
+		
+		Tensor expGradInput = new Tensor(4);
+		expGradInput.fill(-1f);
+		
+		testModule(i, input, expOutput, gradOutput, expGradInput);
 	}
-	
-	@Override
-	public int next() {
-		if(index >= dataset.size()){
-			index = 0;
-		}
-		return index++;
-	}
 
-	@Override
-	public int[] next(int count){
-		int[] indices = new int[count];
-		int size = dataset.size();
-		for(int i=0;i<count;i++){
-			if(index >= size){
-				indices[i] = 0;
-			} else {
-				indices[i] = index++;
-			}
-		}
-		return indices;
-	}
 }

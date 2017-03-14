@@ -374,7 +374,7 @@ public abstract class AbstractExperiencePool extends AbstractDataset implements 
 					noSamples -= removed.length;
 				}
 				
-				writeData(index*sampleSize, buffer);
+				writeData((long)index*(long)sampleSize, buffer);
 				index++;
 			}
 			
@@ -387,30 +387,6 @@ public abstract class AbstractExperiencePool extends AbstractDataset implements 
 		} finally {
 			if(locked)
 				lock.writeLock().unlock();
-		}
-	}
-	
-	@Override
-	public void removeSequence(final int sequence){
-		try {
-			lock.writeLock().lock();
-			SequenceLocation seq = sequences.remove(sequence);
-			noSamples -= seq.length;
-		} finally {
-			lock.writeLock().unlock();
-		}
-	}
-	
-	@Override
-	public Sequence<ExperiencePoolSample> removeAndGetSequence(Sequence<ExperiencePoolSample> s, final int sequence){
-		try {
-			lock.writeLock().lock();
-			s = getSequence(s, sequence, 0, -1);
-			SequenceLocation seq = sequences.remove(sequence);
-			noSamples -= seq.length;
-			return s;
-		} finally {
-			lock.writeLock().unlock();
 		}
 	}
 	
@@ -490,8 +466,8 @@ public abstract class AbstractExperiencePool extends AbstractDataset implements 
 		return s;
 	}
 	
-	private int getBufferPosition(int index, int start){
-		int pos = (start+index) % maxSize;
+	private long getBufferPosition(long index, long start){
+		long pos = (start+index) % maxSize;
 		return pos*sampleSize;
 	}
 	
@@ -510,9 +486,9 @@ public abstract class AbstractExperiencePool extends AbstractDataset implements 
 	
 	protected abstract void setup(Map<String, Object> config);
 	
-	protected abstract void loadData(int position, float[] data);
+	protected abstract void loadData(long position, float[] data);
 	
-	protected abstract void writeData(int position, float[] data);
+	protected abstract void writeData(long position, float[] data);
 
 	protected abstract void dumpData() throws IOException;
 	
