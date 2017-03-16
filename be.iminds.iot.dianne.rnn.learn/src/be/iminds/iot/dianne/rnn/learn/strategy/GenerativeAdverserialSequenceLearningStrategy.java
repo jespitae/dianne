@@ -109,7 +109,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		generator.zeroDeltaParameters();
 		discriminator.zeroDeltaParameters();
 		
-		generator.resetMemory(config.batchSize);
+		//generator.resetMemory(config.generatorDim);
 		discriminator.resetMemory(config.batchSize);
 		
 		// sample sequence
@@ -120,6 +120,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		
 		// Load minibatch of real data for the discriminator 
 		sequence = dataset.getBatchedSequence(sequence, sequences, indexes, config.sequenceLength);
+		System.out.println(sequence.getInputs().get(0).dims()[1]);
 		// These should be classified as correct by discriminator
 		target.fill(0.85f);
 		target.reshape(config.batchSize, 1);
@@ -135,7 +136,9 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		target.fill(0.15f);
 		sequence.data.clear();		
 		
-		fillSequence();
+		generateSequence();
+		
+		System.out.println(sequence.getInputs().get(0).dims()[1]);
 				
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
@@ -152,9 +155,9 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		
 		// This should be classified correct by discriminator to get the gradient improving the generator
 		target.fill(0.85f);
-		sequence.data.clear();		
+		sequence.data.clear();
 		
-		fillSequence();
+		generateSequence();
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		
 		float g_loss = TensorOps.mean(criterion.loss(output, target));
@@ -175,7 +178,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		return new GenerativeAdverserialLearnProgress(i, d_loss_positive, d_loss_negative, g_loss);
 	}
 
-	private void fillSequence() {				
+	private void generateSequence() {				
 		Batch start = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
 		for(int b = 0; b < config.batchSize; b++) {
 			start.getInput(b).randn();			
