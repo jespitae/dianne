@@ -120,7 +120,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		
 		// Load minibatch of real data for the discriminator 
 		sequence = dataset.getBatchedSequence(sequence, sequences, indexes, config.sequenceLength);
-		System.out.println(sequence.getInputs().get(0).dims()[1]);
+		
 		// These should be classified as correct by discriminator
 		target.fill(0.85f);
 		target.reshape(config.batchSize, 1);
@@ -138,7 +138,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		
 		generateSequence();
 		
-		System.out.println(sequence.getInputs().get(0).dims()[1]);
+		
 				
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
