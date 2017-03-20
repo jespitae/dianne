@@ -109,7 +109,6 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		generator.zeroDeltaParameters();
 		discriminator.zeroDeltaParameters();
 		
-		//generator.resetMemory(config.generatorDim);
 		discriminator.resetMemory(config.batchSize);
 		
 		// sample sequence
@@ -135,11 +134,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		// these should be classified as incorrect by discriminator
 		target.fill(0.15f);
 		sequence.data.clear();		
-		
 		generateSequence();
-		
-		
-				
+						
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
 		gradOutput = criterion.grad(output, target);
@@ -163,9 +159,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		float g_loss = TensorOps.mean(criterion.loss(output, target));
 		gradOutput = criterion.grad(output, target);
 		Tensor gradInput = discriminator.backward(gradOutput);
-				
 		generator.backward(gradInput);
-		
 		// Update generator weights
 		generator.accGradParameters();
 		
@@ -178,7 +172,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		return new GenerativeAdverserialLearnProgress(i, d_loss_positive, d_loss_negative, g_loss);
 	}
 
-	private void generateSequence() {				
+	private void generateSequence() {	
+		generator.resetMemory(0);
 		Batch start = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
 		for(int b = 0; b < config.batchSize; b++) {
 			start.getInput(b).randn();			

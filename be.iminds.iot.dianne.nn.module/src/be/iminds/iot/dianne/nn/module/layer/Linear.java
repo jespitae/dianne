@@ -117,6 +117,7 @@ public class Linear extends AbstractTrainableModule {
 			initDeltaParameters(null);
 		}
 		gradInput = ModuleOps.linearGradIn(gradInput, gradOutput, weights, input);
+		System.out.println(gradOutput.dim());
 		gradInput.reshape(inputDims);
 	}
 
