@@ -180,12 +180,12 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			TensorOps.div(gradInput, gradInput, temperature);
 			
 			gradInput = generator.backward(gradInput);
-			for(int s = config.sequenceLength - 1; s >= 0; s--) {
+			for(int s = config.sequenceLength - 2; s >= 0; s--) {
 				for(UUID key : memories.get(s).keySet()) {
 					generator.getMemory(key).setMemory(memories.get(s).get(key).getMemory());
 				}
 				generator.forward(sequence.get(s).getInput());
-				ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(s - 1), sequence.get(s - 1).getTarget());
+				ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(s), sequence.get(s).getTarget());
 				TensorOps.div(gradInput, gradInput, temperature);
 				gradInput = generator.backward(gradInput);
 			}
