@@ -84,11 +84,15 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	protected Tensor output;
 	
 	protected int temperature;
+	protected float epsilon;
 	
 	@Override
 	public void setup(Map<String, String> config, Dataset dataset, NeuralNetwork... nns) throws Exception {
 		this.dataset = (SequenceDataset) dataset;
 		this.temperature = 5;
+		this.epsilon = (float) (1f * Math.pow(10,-20));
+
+		System.out.println(epsilon);
 		
 		this.generator = nns[0];
 		this.discriminator = nns[1];
@@ -111,7 +115,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	@Override
 	public LearnProgress processIteration(long i) throws Exception {
 		//Anneal temperature
-		if(i != 1 && (i % 500) == 0) {
+		if(temperature != 1 && (i % 500) == 0) {
 			temperature--;
 		}		
 		
@@ -247,6 +251,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			sample.getInput().set(sequence.get(s - 1).getTarget().get());
 			out = generator.forward(sample.getInput());				
 			sample.getTarget().set(gumbelSoftmax(out).get());
+			System.out.println(sample.getTarget().get(0) + " " + sample.getTarget().get(1) + " " + sample.getTarget().get(2) + " " + sample.getTarget().get(3) + " " + sample.getTarget().get(4));
 			sequence.data.add(sample);	
 		}
 	}
@@ -255,7 +260,6 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	private Tensor gumbelSoftmax(Tensor tensor) {
 		Tensor gumbelSample = new Tensor(config.generatorDim);
 		gumbelSample.rand();
-		float epsilon = (float) (1f * Math.pow(10,-20));
 		
 		//Calculate gumbel sample
 		TensorOps.add(gumbelSample, gumbelSample, epsilon);
