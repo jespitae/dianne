@@ -92,8 +92,6 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		this.temperature = 5;
 		this.epsilon = (float) (1f * Math.pow(10,-20));
 
-		System.out.println(epsilon);
-		
 		this.generator = nns[0];
 		this.discriminator = nns[1];
 		
@@ -251,7 +249,6 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			sample.getInput().set(sequence.get(s - 1).getTarget().get());
 			out = generator.forward(sample.getInput());				
 			sample.getTarget().set(gumbelSoftmax(out).get());
-			System.out.println(sample.getTarget().get(0) + " " + sample.getTarget().get(1) + " " + sample.getTarget().get(2) + " " + sample.getTarget().get(3) + " " + sample.getTarget().get(4));
 			sequence.data.add(sample);	
 		}
 	}
