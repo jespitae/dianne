@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import be.iminds.iot.dianne.api.dataset.Batch;
 import be.iminds.iot.dianne.api.dataset.Dataset;
 import be.iminds.iot.dianne.api.dataset.Sample;
 import be.iminds.iot.dianne.api.dataset.Sequence;
@@ -78,7 +79,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	protected List<Map<UUID, Tensor>> memories;
 	protected List<Tensor> inputs;
 	
-	protected Sequence<Sample> sequence;
+	protected Sequence<Batch> sequence;
 	
 	protected Tensor target;
 	protected Tensor output;
@@ -97,8 +98,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		
 		String[] labels = this.dataset.getLabels();
 		if(labels!=null)
-			this.generator.setOutputLabels(labels);
-		
+			this.generator.setOutputLabels(labels);		
 		
 		this.config = DianneConfigHandler.getConfig(config, GenerativeAdverserialSequenceConfig.class);
 			
@@ -107,7 +107,11 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		gradientProcessorG = ProcessorFactory.createGradientProcessor(this.config.method, generator, config);
 		gradientProcessorD = ProcessorFactory.createGradientProcessor(this.config.method, discriminator, config);
 		
-		target = new Tensor(1);
+		target = new Tensor(this.config.batchSize, 1);
+		
+		// Initialize lists to store inputs and memories
+		memories = new ArrayList<>();
+		inputs = new ArrayList<>();
 	}
 
 	@Override
@@ -121,91 +125,82 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		generator.zeroDeltaParameters();
 		discriminator.zeroDeltaParameters();
 		
-		discriminator.resetMemory(0);
+		// Reset memory
+		discriminator.resetMemory(config.batchSize);
+		generator.resetMemory(config.batchSize);
 		
-		float d_loss_positive = 0;
-		float d_loss_negative = 0;
-		float g_loss = 0;
-		// Sample sequence
-		int[] sequences = sampling.sequence(config.nrOfSequences);
+		// Sample sequences and indexes
+		int[] sequences = sampling.sequence(config.batchSize);
 		int[] indexes = sampling.next(sequences, config.sequenceLength);
 
 		// These should be classified as correct by the discriminator
 		target.fill(0.85f);
 	
-		// First update the discriminator
-		for(int b=0; b < config.nrOfSequences; b++) {
-			// Load minibatch of real data for the discriminator 
-			sequence = dataset.getSequence(sequences[b], indexes[b], config.sequenceLength);
-			// These should be classified as correct by discriminator
-			output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);			
-			d_loss_positive += TensorOps.mean(criterion.loss(output, target));
-			Tensor gradOutput = criterion.grad(output, target);
-			discriminator.backward(gradOutput);
+		// Load minibatch of real data for the discriminator 
+		sequence = dataset.getBatchedSequence(sequence, sequences, indexes, config.sequenceLength);
+		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);			
+		float d_loss_positive = TensorOps.mean(criterion.loss(output, target));
+		Tensor gradOutput = criterion.grad(output, target);
+		discriminator.backward(gradOutput);
 			
-			// Keep gradients to the parameters
-			discriminator.accGradParameters();
-		}
+		// Keep gradients to the parameters
+		discriminator.accGradParameters();		
 				
+		// Reset memory discriminator
+		discriminator.resetMemory(config.batchSize);
+		
 		// These should be classified as incorrect by discriminator
 		target.fill(0.15f);	
-		
-		memories = new ArrayList<>();
-		inputs = new ArrayList<>();
-		
-		for(int b=0; b < config.nrOfSequences; b++) {
-			generateSequence();
-			output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);
-			d_loss_negative += TensorOps.mean(criterion.loss(output, target));
-			Tensor gradOutput = criterion.grad(output, target);
-			discriminator.backward(gradOutput);	
+				
+		generateSequence();
+		output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);
+		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
+		gradOutput = criterion.grad(output, target);
+		discriminator.backward(gradOutput);	
 			
-			// Update discriminator weights
-			discriminator.accGradParameters();		
-		}
-		
+		// Update discriminator weights
+		discriminator.accGradParameters();		
+				
 		// Run gradient processors
 		gradientProcessorD.calculateDelta(i);
 		
 		discriminator.updateParameters();
+
+		// Reset memory discriminator
+		discriminator.resetMemory(config.batchSize);
 		
 		// This should be classified correct by discriminator to get the gradient improving the generator
 		target.fill(0.85f);
-		
-		for(int b = 0; b < config.nrOfSequences; b++) {
-			//Generate new sequence
-			generateSequence();
+					
+		output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);			
+		float g_loss = TensorOps.mean(criterion.loss(output, target));
+		gradOutput = criterion.grad(output, target);
+		Tensor gradInput = discriminator.backward(gradOutput);
 			
-			output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);			
-			g_loss += TensorOps.mean(criterion.loss(output, target));
-			Tensor gradOutput = criterion.grad(output, target);
-			Tensor gradInput = discriminator.backward(gradOutput);
+		//Differentiate gradients
+		ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
+		TensorOps.div(gradInput, gradInput, temperature);
 			
-			//Differentiate gradients
-			ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
-			TensorOps.div(gradInput, gradInput, temperature);
+		gradInput = generator.backward(gradInput);
 			
-			gradInput = generator.backward(gradInput);
+		// Update generator weights
+		generator.accGradParameters();
 			
-			// Update generator weights
-			generator.accGradParameters();
-			
-			for(int s = config.sequenceLength - 2; s >= 0; s--) {
-				//Set memory
-				for(UUID key : memories.get(s).keySet()) {
-					generator.getMemory(key).setMemory(memories.get(s).get(key));
-				}
-				//Forward input
-				generator.forward(sequence.get(s).getInput());
-				//Differentiate gradients
-				ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(s), sequence.get(s).getTarget());
-				TensorOps.div(gradInput, gradInput, temperature);
-				
-				gradInput = generator.backward(gradInput);
-
-				// Update generator weights
-				generator.accGradParameters();
+		for(int s = config.sequenceLength - 2; s >= 0; s--) {
+			//Set memory
+			for(UUID key : memories.get(s).keySet()) {
+				generator.getMemory(key).setMemory(memories.get(s).get(key));
 			}
+			//Forward input
+			generator.forward(sequence.get(s).getInput());
+			//Differentiate gradients
+			ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(s), sequence.get(s).getTarget());
+			TensorOps.div(gradInput, gradInput, temperature);
+				
+			gradInput = generator.backward(gradInput);
+
+			// Update generator weights
+			generator.accGradParameters();			
 		}
 				
 		// Run gradient processors
@@ -218,44 +213,42 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	}
 
 	private void generateSequence() {
-		//Clear memory and data structures
-		generator.resetMemory(0);			
+		// Clear memory and inputs
 		memories.clear();
 		inputs.clear();
-		sequence.data.clear();
 		
-		//Save memory of network
+		// Save memory of network
 		HashMap<UUID, Tensor> initialMemory = new HashMap<>();
 		for(UUID id : generator.getMemories().keySet()) {
 			initialMemory.put(id, generator.getMemories().get(id).getMemory().clone());
 		}		
 		memories.add(initialMemory);
 		
-		Sample start = new Sample(new Tensor(config.generatorDim), new Tensor(config.generatorDim));
+		Batch start = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
 		start.getInput().randn();
 		Tensor out = generator.forward(start.getInput());
-		start.getTarget().set(gumbelSoftmax(out).get());
+		start.getTarget().copyInto(gumbelSoftmax(out));
 		sequence.data.add(start);
 		
 		for(int s = 1; s < config.sequenceLength; s++) {
-			//Save memory of network
+			// Save memory of network
 			HashMap<UUID, Tensor> memory = new HashMap<>();
 			for(UUID id : generator.getMemories().keySet()) {
 				memory.put(id, generator.getMemories().get(id).getMemory().clone());
 			}		
 			memories.add(memory);
 			
-			Sample sample = new Sample(new Tensor(config.generatorDim), new Tensor(config.generatorDim));
-			sample.getInput().set(sequence.get(s - 1).getTarget().get());
-			out = generator.forward(sample.getInput());				
-			sample.getTarget().set(gumbelSoftmax(out).get());
-			sequence.data.add(sample);	
+			Batch batch = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
+			batch.getInput().copyInto(sequence.get(s - 1).getTarget());
+			out = generator.forward(batch.getInput());				
+			batch.getTarget().copyInto(gumbelSoftmax(out));
+			sequence.data.add(batch);	
 		}
 	}
 		
 	//Create gumbel-softmax sample
 	private Tensor gumbelSoftmax(Tensor tensor) {
-		Tensor gumbelSample = new Tensor(config.generatorDim);
+		Tensor gumbelSample = new Tensor(config.batchSize, config.generatorDim);
 		gumbelSample.rand();
 		
 		//Calculate gumbel sample
@@ -266,8 +259,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		TensorOps.log(gumbelSample, gumbelSample);
 		TensorOps.mul(gumbelSample, gumbelSample, -1f);
 		
-		Tensor input = new Tensor(config.generatorDim);
-		//Calculate gumbel-softmax sample
+		Tensor input = new Tensor(config.batchSize, config.generatorDim);
+		// Calculate gumbel-softmax sample
 		TensorOps.add(input, tensor, gumbelSample);
 		TensorOps.div(input, input, temperature);
 		inputs.add(input);

@@ -30,18 +30,12 @@ public class GenerativeAdverserialSequenceConfig {
 	/**
 	 * Batch size in which samples are processed before updating parameters
 	 */
-	public int batchSize = 1;
+	public int batchSize = 10;
 	
 	/**
 	 * Length of the sequence to feed into the network before backpropagating 
 	 */
-	public int sequenceLength = 10;
-	
-	/**
-	 * Length of the sequence to feed into the network before backpropagating 
-	 */
-	public int nrOfSequences = 10;
-	
+	public int sequenceLength = 10;	
 	/**
 	 * The gradient optimization method to use
 	 *  * SGD - stochastic gradient descent (optionally with (nesterov) momentum and regularization parameters)
