@@ -230,7 +230,7 @@ public class DianneGenerationCommands {
 
 	private char nextChar(NeuralNetwork nn, char current, float leniency, float density, float linearity, float patterns) {
 		// construct input tensor
-		Tensor in = fillTensor(new Tensor(labels.length + 4), current);				
+		Tensor in = fill(new Tensor(labels.length + 4), current);				
 		in.set(leniency, labels.length);
 		in.set(density, labels.length + 1);
 		in.set(linearity, labels.length + 2);
@@ -244,7 +244,7 @@ public class DianneGenerationCommands {
 
 	private char nextChar(NeuralNetwork nn, char current) {
 		// construct input tensor
-		Tensor in = fillTensor(new Tensor(labels.length), current);
+		Tensor in = fill(new Tensor(labels.length), current);
 		
 		// forward
 		Tensor out = nn.forward(in);
@@ -254,7 +254,7 @@ public class DianneGenerationCommands {
 	
 	private char nextChar(NeuralNetwork nn, char current, int difficulty) {
 		// construct input tensor
-		Tensor in = fillTensor(new Tensor(labels.length + 4), current);
+		Tensor in = fill(new Tensor(labels.length + 3), current);
 		in.set(1.0f, labels.length + difficulty);
 		
 		// forward
@@ -263,7 +263,7 @@ public class DianneGenerationCommands {
 		return sample(out);		
 	}
 	
-	private Tensor fillTensor(Tensor in, char current) {
+	private Tensor fill(Tensor in, char current) {
 		in.fill(0.0f);
 		int index = 0;
 		for (int i = 0; i < labels.length; i++) {
