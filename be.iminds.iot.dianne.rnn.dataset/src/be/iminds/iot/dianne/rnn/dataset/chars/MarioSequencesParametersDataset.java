@@ -22,7 +22,9 @@
  *******************************************************************************/
 package be.iminds.iot.dianne.rnn.dataset.chars;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -52,7 +54,7 @@ import be.iminds.iot.dianne.tensor.TensorOps;
 		immediate=true,
 		property={"aiolos.unique=true","aiolos.combine=*"},
 		configurationPolicy=ConfigurationPolicy.REQUIRE,
-		configurationPid="be.iminds.iot.dianne.dataset.MarioSequencesDifficultyDataset")
+		configurationPid="be.iminds.iot.dianne.dataset.MarioSequencesParametersDataset")
 public class MarioSequencesParametersDataset extends AbstractDataset implements SequenceDataset<Sample, Batch> {
 
 	private String[] files = {"mario-1-1.txt", "mario-1-2.txt", "mario-1-3.txt", "mario-2-1.txt", "mario-3-3.txt", 
@@ -62,16 +64,11 @@ public class MarioSequencesParametersDataset extends AbstractDataset implements 
 			, "SuperMarioBros2(J)-World4-1.txt", "SuperMarioBros2(J)-World4-3.txt", "SuperMarioBros2(J)-World5-2.txt"
 			, "SuperMarioBros2(J)-World6-3.txt", "SuperMarioBros2(J)-WorldA-3.txt", "SuperMarioBros2(J)-WorldB-3.txt"};
 	
-	private int[] difficulties = {0, 0, 1, 1, 
-			1, 0, 1, 1, 1,
-			0, 1, 2, 0, 2, 
-			0, 1, 1, 2,	1,
-			2, 2, 2, 1,	2,
-			0, 0, 1, 1, 
-			1, 0, 1, 1, 1,
-			0, 1, 2, 0, 2, 
-			0, 1, 1, 2,	1,
-			2, 2, 2, 1,	2,};
+	private String metricsUrl = "metrics.txt";
+
+	private int nrOfParameters = 4;
+	
+	private float[][] parameters = new float[2 * files.length][nrOfParameters];
 	
 	private String[] data;
 	private String allData = "";
@@ -86,8 +83,7 @@ public class MarioSequencesParametersDataset extends AbstractDataset implements 
 			data = new String[files.length * 2];
 			noSamples = 0;
 			
-			for(int t = 0; t < files.length; t++) {
-
+			for(int t = 0; t < files.length; t++) {				
 				// read the data
 				byte[] encoded = Files.readAllBytes(Paths.get(dir+File.separator+files[t]));
 				data[t] = new String(encoded, Charset.defaultCharset());
@@ -148,6 +144,36 @@ public class MarioSequencesParametersDataset extends AbstractDataset implements 
 			inputDims = new int[]{chars.length()};
 			targetDims = new int[]{chars.length()};
 			
+			// Load parameters
+			File file = new File(dir+File.separator+metricsUrl);
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			
+			float[] maxValues = new float[nrOfParameters]; 
+			
+			for(int f = 0; f < files.length; f++) {
+				for(int p = 0; p < nrOfParameters; p++) {
+					float value = Float.parseFloat(reader.readLine());
+					parameters[f][p] = value;
+					parameters[files.length + f][p] = value;
+					if(f == 0) {
+						maxValues[p] = value;
+					} else {
+						if(value > maxValues[p]) {
+							maxValues[p] = value;
+						}
+					}
+				}
+			}
+			
+			reader.close();
+			
+			for(int f = 0; f < files.length; f++) {
+				for(int p = 0; p < nrOfParameters; p++) {
+					parameters[f][p] /= maxValues[p];
+					parameters[files.length + f][p] /= maxValues[p];
+				}
+			}
+			
 		} catch(Exception e){
 			e.printStackTrace();
 			throw new RuntimeException("Failed to load char sequence dataset", e);
@@ -202,14 +228,16 @@ public class MarioSequencesParametersDataset extends AbstractDataset implements 
 		int index = 0;
 		index = chars.indexOf(c);
 		if(t == null)
-			t = new Tensor(chars.length() + 3);
+			t = new Tensor(chars.length() + nrOfParameters);
 		t.fill(0.0f);
 		if(index == -1) {
 			System.err.println("Character "+c+" is not in the vocabulary");
 			return t;
 		}
 		t.set(1.0f, index);
-		t.set(1.0f, chars.length() + difficulties[sequence]);
+		for(int p = 0; p < 4; p++) {
+			t.set(parameters[sequence][p], chars.length() + p);
+		}
 		return t;
 	}
 	
@@ -317,7 +345,7 @@ public class MarioSequencesParametersDataset extends AbstractDataset implements 
 		for(int i=0;i<length;i++){
 			Batch batch;
 			if(b.size() <= i){
-				batch = new Batch(previous != null ? previous.target : new Tensor(sequences.length, chars.length() + 3), new Tensor(sequences.length, chars.length() + 3));
+				batch = new Batch(previous != null ? previous.target : new Tensor(sequences.length, chars.length() + nrOfParameters), new Tensor(sequences.length, chars.length() + nrOfParameters));
 				b.add(batch);
 			} else {
 				batch = b.get(i);

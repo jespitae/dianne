@@ -235,7 +235,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			HashMap<UUID, Tensor> memory = new HashMap<>();
 			for(UUID id : generator.getMemories().keySet()) {
 				memory.put(id, generator.getMemories().get(id).getMemory().clone());
-			}		
+			}
 			memories.add(memory);
 			
 			Batch batch = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
