@@ -41,7 +41,8 @@ import be.iminds.iot.dianne.tensor.TensorOps;
 @Component(service = Object.class, 
 	property = { 
 		"osgi.command.scope=dianne",
-		"osgi.command.function=generate"}, 
+		"osgi.command.function=generate",
+		"osgi.command.function=generateLevel"}, 
 	immediate = true)
 public class DianneGenerationCommands {
 
@@ -52,9 +53,45 @@ public class DianneGenerationCommands {
 	private int x, y, xDim, yDim;
 	private char[][] output;
 	private boolean down;
+	
 
 	@Descriptor("Generate a string sequence with a neural network")
 	public void generate(
+			@Descriptor("neural network to use for generation")
+			String nnName, 
+			@Descriptor("start string to feed to the neural net first")
+			String start, 
+			@Descriptor("length of the string to generate")
+			int n, 
+			@Descriptor("optional tags of the neural net to load")
+			String... tags) {
+		// forward of a rnn
+		NeuralNetworkInstanceDTO nni = null;
+		try {
+			nni = platform.deployNeuralNetwork(nnName, "test rnn", tags);
+			NeuralNetwork nn = dianne.getNeuralNetwork(nni).getValue();
+
+			System.out.print(start);
+
+			for (int i = 0; i < start.length() - 1; i++) {
+				nextChar(nn, start.charAt(i));
+			}
+
+			char c = start.charAt(start.length() - 1);
+			for (int i = 0; i < n; i++) {
+				c = nextChar(nn, c);
+				System.out.print(""+c);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			platform.undeployNeuralNetwork(nni);
+		}
+}
+
+	@Descriptor("Generate a string sequence with a neural network")
+	public void generateLevel(
 			@Descriptor("neural network to use for generation")
 			String nnName, 
 			@Descriptor("start string to feed to the neural net first")
@@ -89,7 +126,7 @@ public class DianneGenerationCommands {
 	}
 	
 	@Descriptor("Generate a level with a neural network")
-	public void generate(
+	public void generateLevel(
 			@Descriptor("neural network to use for generation")
 			String nnName, 
 			@Descriptor("start level to feed to the neural net first")
@@ -126,7 +163,7 @@ public class DianneGenerationCommands {
 	}
 	
 	@Descriptor("Generate a level with a neural network")
-	public void generate(
+	public void generateLevel(
 			@Descriptor("neural network to use for generation")
 			String nnName, 
 			@Descriptor("start level to feed to the neural net first")
