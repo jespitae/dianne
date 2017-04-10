@@ -35,6 +35,7 @@ import be.iminds.iot.dianne.api.nn.Dianne;
 import be.iminds.iot.dianne.api.nn.NeuralNetwork;
 import be.iminds.iot.dianne.api.nn.module.dto.NeuralNetworkInstanceDTO;
 import be.iminds.iot.dianne.api.nn.platform.DiannePlatform;
+import be.iminds.iot.dianne.tensor.ModuleOps;
 import be.iminds.iot.dianne.tensor.Tensor;
 import be.iminds.iot.dianne.tensor.TensorOps;
 
@@ -63,6 +64,8 @@ public class DianneGenerationCommands {
 			String start, 
 			@Descriptor("length of the string to generate")
 			int n, 
+			@Descriptor("softmax at end of model")
+			boolean hasSoftmax, 
 			@Descriptor("optional tags of the neural net to load")
 			String... tags) {
 		// forward of a rnn
@@ -70,16 +73,22 @@ public class DianneGenerationCommands {
 		try {
 			nni = platform.deployNeuralNetwork(nnName, "test rnn", tags);
 			NeuralNetwork nn = dianne.getNeuralNetwork(nni).getValue();
+			
+			labels = nn.getOutputLabels();
+			if (labels == null) {
+				throw new RuntimeException(
+						"Neural network " + nn.getNeuralNetworkInstance().name + " is not trained and has no labels");
+			}
 
 			System.out.print(start);
 
 			for (int i = 0; i < start.length() - 1; i++) {
-				nextChar(nn, start.charAt(i));
+				nextChar(nn, start.charAt(i), hasSoftmax);
 			}
 
 			char c = start.charAt(start.length() - 1);
 			for (int i = 0; i < n; i++) {
-				c = nextChar(nn, c);
+				c = nextChar(nn, c, hasSoftmax);
 				System.out.print(""+c);
 			}
 
@@ -88,7 +97,7 @@ public class DianneGenerationCommands {
 		} finally {
 			platform.undeployNeuralNetwork(nni);
 		}
-}
+	}
 
 	@Descriptor("Generate a string sequence with a neural network")
 	public void generateLevel(
@@ -97,7 +106,9 @@ public class DianneGenerationCommands {
 			@Descriptor("start string to feed to the neural net first")
 			String start, 
 			@Descriptor("length of the string to generate")
-			int n,
+			int n, 
+			@Descriptor("softmax at end of model")
+			boolean hasSoftmax, 
 			@Descriptor("optional tags of the neural net to load")
 			String... tags) {
 		// forward of a rnn
@@ -107,12 +118,12 @@ public class DianneGenerationCommands {
 			NeuralNetwork nn = setup(nni, start, n);
 			
 			for (int i = 0; i < start.length() - 1; i++) {
-				nextChar(nn, start.charAt(i));
+				nextChar(nn, start.charAt(i), hasSoftmax);
 			}
 
 			char c = start.charAt(start.length() - 1);
 			for (int i = start.length(); i < n; i++) {
-				c = nextChar(nn, c);
+				c = nextChar(nn, c, hasSoftmax);
 				update(c);
 			}
 
@@ -279,13 +290,16 @@ public class DianneGenerationCommands {
 		return sample(out);
 	}
 
-	private char nextChar(NeuralNetwork nn, char current) {
+	private char nextChar(NeuralNetwork nn, char current, boolean hasSoftmax) {
 		// construct input tensor
 		Tensor in = fill(new Tensor(labels.length), current);
 		
 		// forward
 		Tensor out = nn.forward(in);
 
+		if(!hasSoftmax) {
+			ModuleOps.logsoftmax(out, out);
+		}
 		return sample(out);
 	}
 	

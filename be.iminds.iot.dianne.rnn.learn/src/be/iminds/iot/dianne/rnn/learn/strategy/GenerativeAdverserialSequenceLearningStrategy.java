@@ -30,7 +30,6 @@ import java.util.UUID;
 
 import be.iminds.iot.dianne.api.dataset.Batch;
 import be.iminds.iot.dianne.api.dataset.Dataset;
-import be.iminds.iot.dianne.api.dataset.Sample;
 import be.iminds.iot.dianne.api.dataset.Sequence;
 import be.iminds.iot.dianne.api.dataset.SequenceDataset;
 import be.iminds.iot.dianne.api.nn.NeuralNetwork;
@@ -38,7 +37,6 @@ import be.iminds.iot.dianne.api.nn.learn.Criterion;
 import be.iminds.iot.dianne.api.nn.learn.GradientProcessor;
 import be.iminds.iot.dianne.api.nn.learn.LearnProgress;
 import be.iminds.iot.dianne.api.nn.learn.LearningStrategy;
-import be.iminds.iot.dianne.api.nn.module.Memory;
 import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory;
 import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory.CriterionConfig;
 import be.iminds.iot.dianne.nn.learn.processors.ProcessorFactory;
@@ -76,15 +74,17 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	
 	protected SequenceSamplingStrategy sampling;
 	
-	protected List<Map<UUID, Tensor>> memories;
+	protected Map<UUID, List<Tensor>> memories;
 	protected List<Tensor> inputs;
 	
-	protected Sequence<Batch> sequence;
-	
+	protected Sequence<Batch> sequence = null;
+		
 	protected Tensor target;
 	protected Tensor output;
+	protected Tensor gumbelSample;
 	
-	protected int temperature;
+	protected float temperature;
+	protected float annealStep;
 	protected float epsilon;
 	
 	@Override
@@ -92,6 +92,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		this.dataset = (SequenceDataset) dataset;
 		this.temperature = 5;
 		this.epsilon = (float) (1f * Math.pow(10,-20));
+		this.annealStep = 0.0004f;
 
 		this.generator = nns[0];
 		this.discriminator = nns[1];
@@ -108,18 +109,22 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		gradientProcessorD = ProcessorFactory.createGradientProcessor(this.config.method, discriminator, config);
 		
 		target = new Tensor(this.config.batchSize, 1);
+		gumbelSample = new Tensor(this.config.batchSize, this.config.generatorDim);
 		
 		// Initialize lists to store inputs and memories
-		memories = new ArrayList<>();
+		memories = new HashMap<>();
+		for(UUID id : generator.getMemories().keySet()) {
+			memories.put(id, new ArrayList<>());
+		}
 		inputs = new ArrayList<>();
 	}
 
 	@Override
 	public LearnProgress processIteration(long i) throws Exception {
 		//Anneal temperature
-		if(temperature != 1 && (i % 500) == 0) {
-			temperature--;
-		}		
+		if(temperature > 1) {
+			temperature = temperature - 0.0004f;
+		}	
 		
 		// Clear delta params
 		generator.zeroDeltaParameters();
@@ -137,8 +142,9 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		target.fill(0.85f);
 	
 		// Load minibatch of real data for the discriminator 
-		sequence = dataset.getBatchedSequence(sequence, sequences, indexes, config.sequenceLength);
-		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);			
+		sequence = dataset.getBatchedSequence(sequence , sequences, indexes, config.sequenceLength);
+				
+		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_positive = TensorOps.mean(criterion.loss(output, target));
 		Tensor gradOutput = criterion.grad(output, target);
 		discriminator.backward(gradOutput);
@@ -150,15 +156,17 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		discriminator.resetMemory(config.batchSize);
 		
 		// These should be classified as incorrect by discriminator
-		target.fill(0.15f);	
-				
+		target.fill(0.15f);
+		
+		// Generate sequence of data
 		generateSequence();
+						
 		output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);
 		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
 		gradOutput = criterion.grad(output, target);
 		discriminator.backward(gradOutput);	
 			
-		// Update discriminator weights
+		// Keep gradients to the parameters
 		discriminator.accGradParameters();		
 				
 		// Run gradient processors
@@ -180,26 +188,27 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		//Differentiate gradients
 		ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
 		TensorOps.div(gradInput, gradInput, temperature);
-			
+		
 		gradInput = generator.backward(gradInput);
 			
-		// Update generator weights
+		// Keep gradients to the parameters
 		generator.accGradParameters();
-			
+					
 		for(int s = config.sequenceLength - 2; s >= 0; s--) {
 			//Set memory
-			for(UUID key : memories.get(s).keySet()) {
-				generator.getMemory(key).setMemory(memories.get(s).get(key));
+			for(UUID id : memories.keySet()) {
+				generator.getMemory(id).setMemory(memories.get(id).get(s));
 			}
 			//Forward input
 			generator.forward(sequence.get(s).getInput());
+			
 			//Differentiate gradients
 			ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(s), sequence.get(s).getTarget());
 			TensorOps.div(gradInput, gradInput, temperature);
 				
 			gradInput = generator.backward(gradInput);
 
-			// Update generator weights
+			// Keep gradients to the parameters
 			generator.accGradParameters();			
 		}
 				
@@ -208,64 +217,66 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		
 		// Update parameters
 		generator.updateParameters();
-		
+	
 		return new GenerativeAdverserialLearnProgress(i, d_loss_positive, d_loss_negative, g_loss);
 	}
 
-	private void generateSequence() {
-		// Clear memory and inputs
-		memories.clear();
-		inputs.clear();
-		
+	private void generateSequence() {		
 		// Save memory of network
-		HashMap<UUID, Tensor> initialMemory = new HashMap<>();
 		for(UUID id : generator.getMemories().keySet()) {
-			initialMemory.put(id, generator.getMemories().get(id).getMemory().clone());
+			Tensor memory = generator.getMemories().get(id).getMemory();
+			if(memories.get(id).isEmpty()) {
+				memories.get(id).add(new Tensor(memory.dims()));				
+			}
+			memories.get(id).get(0).set(memory.get());
 		}		
-		memories.add(initialMemory);
 		
-		Batch start = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
+		Batch start = sequence.get(0); 
 		start.getInput().randn();
 		Tensor out = generator.forward(start.getInput());
-		start.getTarget().copyInto(gumbelSoftmax(out));
-		sequence.data.add(start);
+		start.getTarget().set(gumbelSoftmax(out, 0).get());
 		
 		for(int s = 1; s < config.sequenceLength; s++) {
 			// Save memory of network
-			HashMap<UUID, Tensor> memory = new HashMap<>();
 			for(UUID id : generator.getMemories().keySet()) {
-				memory.put(id, generator.getMemories().get(id).getMemory().clone());
+				Tensor memory = generator.getMemories().get(id).getMemory();
+				if(memories.get(id).size() <= s) {
+					memories.get(id).add(new Tensor(memory.dims()));
+				}
+				memories.get(id).get(s).set(memory.get());
 			}
-			memories.add(memory);
 			
-			Batch batch = new Batch(new Tensor(config.batchSize, config.generatorDim), new Tensor(config.batchSize, config.generatorDim));
-			batch.getInput().copyInto(sequence.get(s - 1).getTarget());
+			Batch batch = sequence.get(s);
+			batch.getInput().set(sequence.get(s - 1).getTarget().get());
 			out = generator.forward(batch.getInput());				
-			batch.getTarget().copyInto(gumbelSoftmax(out));
-			sequence.data.add(batch);	
+			batch.getTarget().set(gumbelSoftmax(out, s).get());
 		}
 	}
 		
 	//Create gumbel-softmax sample
-	private Tensor gumbelSoftmax(Tensor tensor) {
-		Tensor gumbelSample = new Tensor(config.batchSize, config.generatorDim);
-		gumbelSample.rand();
+	private Tensor gumbelSoftmax(Tensor tensor, int s) {
+		// Create new gumbel sample
+		gumbelSample();
 		
-		//Calculate gumbel sample
-		TensorOps.add(gumbelSample, gumbelSample, epsilon);
-		TensorOps.log(gumbelSample, gumbelSample);
-		TensorOps.mul(gumbelSample, gumbelSample, -1f);
-		TensorOps.add(gumbelSample, gumbelSample, epsilon);
-		TensorOps.log(gumbelSample, gumbelSample);
-		TensorOps.mul(gumbelSample, gumbelSample, -1f);
+		TensorOps.add(tensor, tensor, gumbelSample);
+		TensorOps.div(tensor, tensor, temperature);
+		if(inputs.size() <= s) {
+			inputs.add(new Tensor(tensor.dims()));
+		}
+		inputs.get(s).set(tensor.get());
 		
-		Tensor input = new Tensor(config.batchSize, config.generatorDim);
-		// Calculate gumbel-softmax sample
-		TensorOps.add(input, tensor, gumbelSample);
-		TensorOps.div(input, input, temperature);
-		inputs.add(input);
-		
-		ModuleOps.softmax(tensor, input);
+		ModuleOps.softmax(tensor, tensor);
 		return tensor;
+	}
+	
+	//Calculate gumbel sample
+	private void gumbelSample() {
+		gumbelSample.rand();	
+		TensorOps.add(gumbelSample, gumbelSample, epsilon);
+		TensorOps.log(gumbelSample, gumbelSample);
+		TensorOps.mul(gumbelSample, gumbelSample, -1f);
+		TensorOps.add(gumbelSample, gumbelSample, epsilon);
+		TensorOps.log(gumbelSample, gumbelSample);
+		TensorOps.mul(gumbelSample, gumbelSample, -1f);
 	}
 }
