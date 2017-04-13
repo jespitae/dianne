@@ -178,7 +178,7 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 		
 		for(UUID id : discriminator.getParameters().keySet()) {
 			Tensor params = discriminator.getParameters().get(id);
-			TensorOps.clamp(params, params, -1f, 1f);
+			TensorOps.clamp(params, params, -0.01f, 0.01f);
 		}
 
 		float g_loss = 0;
