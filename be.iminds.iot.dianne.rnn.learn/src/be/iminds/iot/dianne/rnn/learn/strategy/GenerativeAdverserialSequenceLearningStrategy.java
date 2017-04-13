@@ -147,10 +147,13 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_positive = TensorOps.mean(criterion.loss(output, target));
 		Tensor gradOutput = criterion.grad(output, target);
-		discriminator.backward(gradOutput);
-			
-		// Keep gradients to the parameters
-		discriminator.accGradParameters();		
+		
+		if(d_loss_positive > 0.5f) {
+			discriminator.backward(gradOutput);
+				
+			// Keep gradients to the parameters
+			discriminator.accGradParameters();	
+		}		
 				
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
@@ -164,15 +167,19 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);
 		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
 		gradOutput = criterion.grad(output, target);
-		discriminator.backward(gradOutput);	
-			
-		// Keep gradients to the parameters
-		discriminator.accGradParameters();		
+		if(d_loss_negative > 0.5) {
+			discriminator.backward(gradOutput);	
 				
-		// Run gradient processors
-		gradientProcessorD.calculateDelta(i);
+			// Keep gradients to the parameters
+			discriminator.accGradParameters();		
+		}
 		
-		discriminator.updateParameters();
+		if(d_loss_negative > 0.5 || d_loss_positive > 0.5) {
+			// Run gradient processors
+			gradientProcessorD.calculateDelta(i);
+			
+			discriminator.updateParameters();
+		}
 
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
@@ -193,7 +200,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			
 		// Keep gradients to the parameters
 		generator.accGradParameters();
-					
+							
 		for(int s = config.sequenceLength - 2; s >= 0; s--) {
 			//Set memory
 			for(UUID id : memories.keySet()) {
