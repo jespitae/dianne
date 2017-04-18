@@ -296,7 +296,6 @@ public class DianneGenerationCommands {
 		
 		// forward
 		Tensor out = nn.forward(in);
-
 		if(!hasSoftmax) {
 			ModuleOps.logsoftmax(out, out);
 		}
@@ -353,7 +352,7 @@ public class DianneGenerationCommands {
 			o = m;
 		}
 
-		return labels[o].charAt(0);
+		return labels[m].charAt(0);
 	}	
 
 	@Reference
