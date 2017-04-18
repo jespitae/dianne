@@ -123,7 +123,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	public LearnProgress processIteration(long i) throws Exception {
 		//Anneal temperature
 		if(temperature > 1) {
-			temperature = temperature - 0.0004f;
+			temperature = temperature - annealStep;
 		}	
 		
 		// Clear delta params
@@ -147,8 +147,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
 		float d_loss_positive = TensorOps.mean(criterion.loss(output, target));
 		Tensor gradOutput = criterion.grad(output, target);
-		
-		if(d_loss_positive > 0.5f) {
+				
+		if(d_loss_positive > 0.6f) {
 			discriminator.backward(gradOutput);
 				
 			// Keep gradients to the parameters
@@ -167,14 +167,15 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);
 		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
 		gradOutput = criterion.grad(output, target);
-		if(d_loss_negative > 0.5) {
+		
+		if(d_loss_negative > 0.6f) {
 			discriminator.backward(gradOutput);	
 				
 			// Keep gradients to the parameters
 			discriminator.accGradParameters();		
 		}
 		
-		if(d_loss_negative > 0.5 || d_loss_positive > 0.5) {
+		if(d_loss_positive > 0.6f || d_loss_negative > 0.6f) {
 			// Run gradient processors
 			gradientProcessorD.calculateDelta(i);
 			
@@ -191,13 +192,13 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		float g_loss = TensorOps.mean(criterion.loss(output, target));
 		gradOutput = criterion.grad(output, target);
 		Tensor gradInput = discriminator.backward(gradOutput);
-			
+		
 		//Differentiate gradients
 		ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
 		TensorOps.div(gradInput, gradInput, temperature);
-		
+				
 		gradInput = generator.backward(gradInput);
-			
+					
 		// Keep gradients to the parameters
 		generator.accGradParameters();
 							
