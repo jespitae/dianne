@@ -20,26 +20,36 @@
  * Contributors:
  *     Tim Verbelen, Steven Bohez
  *******************************************************************************/
-package be.iminds.iot.dianne.rnn.learn.strategy.config;
+package be.iminds.iot.dianne.rl.learn.strategy.config;
 
 import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory.CriterionConfig;
 import be.iminds.iot.dianne.nn.learn.processors.ProcessorFactory.ProcessorConfig;
 import be.iminds.iot.dianne.nn.learn.sampling.SamplingFactory.SamplingConfig;
 
-public class BPTTConfig {
+public class RecurrentDeepQConfig {
 
 	/**
-	 * Batchsize to process inputs
+	 * Length of the sequences to train on 
 	 */
-	public int batchSize = 1;
+	public int sequenceLength;
 	
 	/**
-	 * Length of the sequence to feed into the network before backpropagating 
+	 * Discount factor
 	 */
-	public int sequenceLength = 1;
+	public float discount = 0.99f;
 	
 	/**
-	 * The criterion to use to evaluate the error between output and target
+	 * Size of the batches that are processed by the Learner
+	 */
+	public int batchSize = 10;
+
+	/**
+	 * Minimum samples that should be in the Experience Pool before training starts
+	 */
+	public int minSamples = 1000;
+
+	/**
+	 * The criterion to use to evaluate the loss between output and target
 	 */
 	public CriterionConfig criterion = CriterionConfig.MSE;
 	
@@ -58,4 +68,5 @@ public class BPTTConfig {
 	 *  * Sequential
 	 */
 	public SamplingConfig sampling = SamplingConfig.UNIFORM;
+	
 }

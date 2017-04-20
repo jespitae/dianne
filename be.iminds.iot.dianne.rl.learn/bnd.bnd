@@ -10,8 +10,13 @@ Bundle-Name: Dianne RL Learners
 	be.iminds.iot.dianne.nn.learn;version=latest,\
 	be.iminds.iot.dianne.tensor.util;version=latest,\
 	osgi.promise,\
-	be.iminds.iot.dianne.nn.util;version=latest
+	be.iminds.iot.dianne.nn.util;version=latest,\
+	be.iminds.iot.dianne.rnn.learn;version=latest
 Export-Package: \
 	be.iminds.iot.dianne.rl.learn.strategy,\
 	be.iminds.iot.dianne.rl.learn.strategy.config,\
+	be.iminds.iot.dianne.rl.learn.sampling,\
+	be.iminds.iot.dianne.rl.learn.sampling.config,\
 	be.iminds.iot.dianne.rl.learn.util
+Import-Package: \
+	*

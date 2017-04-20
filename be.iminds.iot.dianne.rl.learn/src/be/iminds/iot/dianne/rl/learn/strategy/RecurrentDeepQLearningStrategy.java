@@ -22,52 +22,56 @@
  *******************************************************************************/
 package be.iminds.iot.dianne.rl.learn.strategy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import be.iminds.iot.dianne.api.dataset.Dataset;
 import be.iminds.iot.dianne.api.nn.NeuralNetwork;
-import be.iminds.iot.dianne.api.nn.learn.Criterion;
 import be.iminds.iot.dianne.api.nn.learn.GradientProcessor;
 import be.iminds.iot.dianne.api.nn.learn.LearnProgress;
 import be.iminds.iot.dianne.api.nn.learn.LearningStrategy;
-import be.iminds.iot.dianne.api.nn.learn.SamplingStrategy;
+import be.iminds.iot.dianne.api.rl.dataset.BatchedExperiencePoolSequence;
 import be.iminds.iot.dianne.api.rl.dataset.ExperiencePool;
 import be.iminds.iot.dianne.api.rl.dataset.ExperiencePoolBatch;
 import be.iminds.iot.dianne.api.rl.learn.QLearnProgress;
-import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory;
 import be.iminds.iot.dianne.nn.learn.processors.ProcessorFactory;
 import be.iminds.iot.dianne.nn.util.DianneConfigHandler;
-import be.iminds.iot.dianne.rl.learn.sampling.PrioritySampler;
-import be.iminds.iot.dianne.rl.learn.strategy.config.DeepQConfig;
+import be.iminds.iot.dianne.rl.learn.strategy.config.RecurrentDeepQConfig;
+import be.iminds.iot.dianne.rnn.learn.criterion.SequenceCriterion;
+import be.iminds.iot.dianne.rnn.learn.criterion.SequenceCriterionFactory;
+import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingFactory;
+import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingStrategy;
 import be.iminds.iot.dianne.tensor.Tensor;
 import be.iminds.iot.dianne.tensor.TensorOps;
 
 /**
- * This learning strategy implements DQN
+ * This learning strategy implements DQN with recurrent layer
  * 
  * The strategy requires 2 NN instances of the same NN: one acting as a target for the other
- * 
- * In order to make this work, make sure to set the syncInterval of the target to make sure it 
- * updates from time to time to the weights of the trained NN.
  * 
  * @author tverbele
  *
  */
-public class DeepQLearningStrategy implements LearningStrategy {
+public class RecurrentDeepQLearningStrategy implements LearningStrategy {
 
-	protected DeepQConfig config;
+	protected RecurrentDeepQConfig config;
 	
 	protected ExperiencePool pool;
-	protected SamplingStrategy sampling;
-	protected PrioritySampler prioritySampler;
+	protected SequenceSamplingStrategy sampling;
+	
+	protected ExperiencePoolBatch batch;
 	
 	protected NeuralNetwork valueNetwork;
 	protected NeuralNetwork targetNetwork;
 	
-	protected Criterion criterion;
+	protected SequenceCriterion criterion;
 	protected GradientProcessor gradientProcessor;
 	
-	protected Tensor targetValueBatch;
+	protected Tensor actionBatch;
+	protected List<Tensor> targets;
+	
+	protected BatchedExperiencePoolSequence sequence;
 	
 	@Override
 	public void setup(Map<String, String> config, Dataset dataset, NeuralNetwork... nns) throws Exception {
@@ -82,13 +86,17 @@ public class DeepQLearningStrategy implements LearningStrategy {
 		this.valueNetwork = nns[0];
 		this.targetNetwork = nns[1];
 		
-		this.config = DianneConfigHandler.getConfig(config, DeepQConfig.class);
-		this.prioritySampler = new PrioritySampler(pool, this.config.sampling, config);
-		this.criterion = CriterionFactory.createCriterion(this.config.criterion, config);
+		this.config = DianneConfigHandler.getConfig(config, RecurrentDeepQConfig.class);
+		this.sampling = SequenceSamplingFactory.createSamplingStrategy(this.config.sampling, this.pool, config);
+		this.criterion = SequenceCriterionFactory.createCriterion(this.config.criterion, config);
 		this.gradientProcessor = ProcessorFactory.createGradientProcessor(this.config.method, valueNetwork, config);
 		
-		// Pre-allocate tensors for batch operations
-		this.targetValueBatch = new Tensor(this.config.batchSize, this.pool.actionDims()[0]);
+		this.actionBatch = new Tensor(this.config.batchSize, this.pool.actionDims()[0]);
+		this.targets = new ArrayList<Tensor>();
+		for(int i=0;i<this.config.sequenceLength;i++){
+			targets.add(new Tensor(this.config.batchSize, this.pool.actionDims()[0]));
+		}
+
 		
 		// Wait for the pool to contain enough samples
 		if(pool.size() < this.config.minSamples){
@@ -109,62 +117,57 @@ public class DeepQLearningStrategy implements LearningStrategy {
 		// Reset the deltas
 		valueNetwork.zeroDeltaParameters();
 		
-		// Reset the action & target value batch
-		// Note: actionBatch is a reverse mask of the action selected
-		targetValueBatch.fill(0);
+		// Reset hidden states
+		this.valueNetwork.resetMemory(this.config.batchSize);
+		this.targetNetwork.resetMemory(this.config.batchSize);
 		
-		// Fill in the batch
-		ExperiencePoolBatch batch = prioritySampler.nextBatch();
+		// sample sequence
+		int[] seq = sampling.sequence(config.batchSize);
+		int[] index = sampling.next(seq, config.sequenceLength);
+		sequence = pool.getBatchedSequence(sequence, seq, index, config.sequenceLength);
 		
-		// calculate value of next state for the target network
-		Tensor nextTargetValue = targetNetwork.forward(batch.nextState);
-		// .. and for the value network in case of double Q learning
-		Tensor nextValue = null;
-		if(config.doubleQ)
-			nextValue = valueNetwork.forward(batch.nextState);
+		List<Tensor> nextValues = targetNetwork.forward(sequence.getNextStates());
 		
-		for(int b = 0; b < config.batchSize; b++) {
-			// Get the data from the sample
-			// Note: actions are one-hot encoded
-			int action = TensorOps.argmax(batch.getAction(b));
-			float reward = batch.getScalarReward(b);
-			
-			// Calculate the target value
-			if(!batch.isTerminal(b)) {
-				// If the next state is not terminal, get the next value using the target network
-				Tensor t = nextTargetValue.select(0, b);
+		for(int s=0; s<config.sequenceLength; s++){
+			Tensor target = targets.get(s);
+			target.fill(0.0f);
+			for(int b=0; b<config.batchSize; b++){
+				int action = TensorOps.argmax(sequence.get(s).getAction(b));
+				float reward = sequence.get(s).getScalarReward(b);
 				
-				// Determine the next action, depends on whether we are using double Q learning or not
-				int nextAction = TensorOps.argmax(config.doubleQ ? nextValue.select(0, b) : t);
-				
-				// Set the target value using the Bellman equation
-				targetValueBatch.set(reward + config.discount*t.get(nextAction), b, action);
-			} else {
-				// If the next state is terminal, the target value is equal to the reward
-				targetValueBatch.set(reward, b, action);
+				// Calculate the target value
+				if(!sequence.get(s).isTerminal(b)) {
+					// TODO add double q learning?
+					
+					// Set the target value using the Bellman equation
+					target.set(reward + config.discount*TensorOps.max(nextValues.get(s).select(0, b)), b, action);
+				} else {
+					// If the next state is terminal, the target value is equal to the reward
+					target.set(reward, b, action);
+				}
 			}
 		}
 		
-		// Forward pass of the value network to get the current value estimate
-		Tensor valueBatch = valueNetwork.forward(batch.getState());
+		List<Tensor> values = valueNetwork.forward(sequence.getStates());
 		
-		// Get the avg value of the best actions in the batch for reporting
 		float value = 0;
-		for(int b = 0; b < config.batchSize; b++) {
-			value += TensorOps.max(valueBatch.select(0, b));
+		for(int s=0; s<config.sequenceLength; s++){
+			for(int b = 0; b < config.batchSize; b++) {
+				value += TensorOps.max(values.get(s).select(0, b));
+			}
 		}
 		value /= config.batchSize;
-
-		// Only keep the values on the actions actually taken
-		TensorOps.cmul(valueBatch, valueBatch, batch.getAction());
+		value /= config.sequenceLength;
 		
-		Tensor l = criterion.loss(valueBatch, targetValueBatch);
-		float loss = TensorOps.mean(l);
-		Tensor grad = criterion.grad(valueBatch, targetValueBatch);
+		for(int s=0; s<config.sequenceLength; s++){
+			TensorOps.cmul(values.get(s), values.get(s), sequence.getAction(s));
+		}
+		
+		float loss =  TensorOps.mean(criterion.loss(values, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/sequence.size;
+		List<Tensor> grad = criterion.grad(values, targets);
 		
 		// Backward pass of the critic
-		valueNetwork.backward(grad);
-		valueNetwork.accGradParameters();
+		valueNetwork.backward(grad, true);
 		
 		// Call the processors to set the updates
 		gradientProcessor.calculateDelta(i);
@@ -173,8 +176,6 @@ public class DeepQLearningStrategy implements LearningStrategy {
 		// Note: target network gets updated automatically by setting the syncInterval option
 		valueNetwork.updateParameters();
 		
-		// Add samples for priority sampling
-		prioritySampler.addBatch(l, batch);
 		
 		return new QLearnProgress(i, loss, value);
 	}

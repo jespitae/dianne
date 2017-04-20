@@ -119,8 +119,17 @@ public class NeuralNetworkWrapper implements NeuralNetwork {
 		try {
 			return getNeuralNetworkInstance().modules.entrySet().stream().filter(e -> name.equalsIgnoreCase(e.getValue().module.properties.get("name"))).findFirst().map(e -> e.getKey()).get();
 		} catch(NoSuchElementException e){
-			return null;
+			throw new RuntimeException("Module with name "+name+" not found");
 		}
+	}
+
+	@Override
+	public UUID[] getModuleIds(String... names) {
+		UUID[] result = new UUID[names.length];
+		for(int i=0;i<names.length;i++){
+			result[i] = getModuleId(names[i]);
+		}
+		return result;
 	}
 	
 	@Override
@@ -342,7 +351,7 @@ public class NeuralNetworkWrapper implements NeuralNetwork {
 
 				// decrement counter
 				int next = index - 1;
-				
+
 				// check if we are done
 				if(next < 0){
 					Deferred<NeuralNetworkSequenceResult> d = new Deferred<>();
@@ -381,11 +390,11 @@ public class NeuralNetworkWrapper implements NeuralNetwork {
 				sequenceOutputs.put(e.getKey(), outs);
 			}
 			
-			if(outs.size() <= index){
-				outs.add(e.getValue().clone());
-			} else {
-				e.getValue().copyInto(outs.get(index));
+			while(outs.size() <= index){
+				outs.add(new Tensor());
 			}
+			
+			e.getValue().copyInto(outs.get(index));
 		});
 	}
 	
@@ -397,11 +406,11 @@ public class NeuralNetworkWrapper implements NeuralNetwork {
 				sequenceMemories.put(e.getKey(), mems);
 			}
 			
-			if(mems.size() <= index){
-				mems.add(e.getValue().getMemory().clone());
-			} else {
-				e.getValue().getMemory().copyInto(mems.get(index));
+			while(mems.size() <= index){
+				mems.add(new Tensor());
 			}
+			
+			e.getValue().getMemory().copyInto(mems.get(index));
 		});	
 	}
 	
@@ -413,11 +422,11 @@ public class NeuralNetworkWrapper implements NeuralNetwork {
 				sequenceGradInputs.put(e.getKey(), gradIns);
 			}
 			
-			if(gradIns.size() <= index){
-				gradIns.add(e.getValue().clone());
-			} else {
-				e.getValue().copyInto(gradIns.get(index));
+			while(gradIns.size() <= index){
+				gradIns.add(new Tensor());
 			}
+			
+			e.getValue().copyInto(gradIns.get(index));
 		});
 	}
 	

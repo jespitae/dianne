@@ -63,6 +63,12 @@ public interface NeuralNetwork {
 	UUID getModuleId(String name);
 	
 	/**
+	 * Get UUIDs for modules by their name. Casing is ignored. A name is not necessary unique, in which case
+	 * this method can return any one of the matching UUIDs.
+	 */
+	UUID[] getModuleIds(String... name);
+	
+	/**
 	 * Forward input through the neural network
 	 * @param inputId id of the Input module to forward the input to
 	 * @param outputId id of the Output module to get the output from - or null for all
@@ -367,6 +373,6 @@ public interface NeuralNetwork {
 	void resetMemory(int batchSize);
 	
 	default void resetMemory(){
-		resetMemory(1);
+		resetMemory(0);
 	}
 }
