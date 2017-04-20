@@ -149,7 +149,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		sequence = dataset.getBatchedSequence(sequence , sequences, indexes, config.sequenceLength);
 				
 		outputs = discriminator.forward(sequence.getInputs());
-		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/config.sequenceLength;
+		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		List<Tensor> gradOutput = criterion.grad(outputs, targets);
 				
 		if(d_loss_positive > 0.6f) {
@@ -168,7 +168,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		generateSequence();
 						
 		outputs = discriminator.forward(sequence.getTargets());
-		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/config.sequenceLength;
+		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		gradOutput = criterion.grad(outputs, targets);
 		
 		if(d_loss_negative > 0.6f) {
@@ -190,12 +190,11 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		}
 		
 		outputs = discriminator.forward(sequence.getTargets());
-		float g_loss = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/config.sequenceLength;
+		float g_loss = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		gradOutput = criterion.grad(outputs, targets);
 		
-		System.out.println(gradOutput.size());
 		List<Tensor> gradInput = discriminator.backward(gradOutput, false);
-				
+		
 		//Differentiate gradients
 		ModuleOps.softmaxGradIn(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
 		TensorOps.div(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), temperature);
