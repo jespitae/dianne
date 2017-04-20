@@ -20,18 +20,18 @@
  * Contributors:
  *     Tim Verbelen, Steven Bohez
  *******************************************************************************/
-package be.iminds.iot.dianne.rl.learn.util;
+package be.iminds.iot.dianne.rl.learn.sampling.config;
 
-public class PrioritySamplerConfig {
+public class ExperienceSamplerConfig {
 
 	/**
-	 * Probability to get a sample from the priority sampling buffer
+	 * Batch size to sample
 	 */
-	public float prioritySamplingFactor = 0f;
+	public int batchSize = 1;
 	
 	/**
-	 * Size of the priority sampling buffer
+	 * Length of the sequence to sample
 	 */
-	public int prioritySamplingSize = 100;
+	public int sequenceLength = 1;
 	
 }

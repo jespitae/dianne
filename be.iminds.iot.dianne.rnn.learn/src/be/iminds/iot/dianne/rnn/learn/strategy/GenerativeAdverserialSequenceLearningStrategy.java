@@ -42,6 +42,8 @@ import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory.CriterionConfig;
 import be.iminds.iot.dianne.nn.learn.processors.ProcessorFactory;
 import be.iminds.iot.dianne.nn.learn.strategy.GenerativeAdverserialLearnProgress;
 import be.iminds.iot.dianne.nn.util.DianneConfigHandler;
+import be.iminds.iot.dianne.rnn.learn.criterion.SequenceCriterion;
+import be.iminds.iot.dianne.rnn.learn.criterion.SequenceCriterionFactory;
 import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingFactory;
 import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingStrategy;
 import be.iminds.iot.dianne.rnn.learn.strategy.config.GenerativeAdverserialSequenceConfig;
@@ -70,7 +72,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	protected GradientProcessor gradientProcessorG;
 	protected GradientProcessor gradientProcessorD;
 
-	protected Criterion criterion;
+	protected SequenceCriterion criterion;
 	
 	protected SequenceSamplingStrategy sampling;
 	
@@ -79,8 +81,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	
 	protected Sequence<Batch> sequence = null;
 		
-	protected Tensor target;
-	protected Tensor output;
+	protected List<Tensor> targets;
+	protected List<Tensor> outputs;
 	protected Tensor gumbelSample;
 	
 	protected float temperature;
@@ -104,11 +106,16 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		this.config = DianneConfigHandler.getConfig(config, GenerativeAdverserialSequenceConfig.class);
 			
 		sampling = SequenceSamplingFactory.createSamplingStrategy(this.config.sampling, this.dataset, config);
-		criterion = CriterionFactory.createCriterion(CriterionConfig.BCE, config);
+		criterion = SequenceCriterionFactory.createCriterion(CriterionConfig.BCE, config);
 		gradientProcessorG = ProcessorFactory.createGradientProcessor(this.config.method, generator, config);
 		gradientProcessorD = ProcessorFactory.createGradientProcessor(this.config.method, discriminator, config);
 		
-		target = new Tensor(this.config.batchSize, 1);
+		targets = new ArrayList<>();
+		Tensor target = new Tensor(this.config.batchSize, 1);
+		target.fill(0.85f);
+		for(int t=0; t < this.config.sequenceLength; t++) {
+			targets.add(target);
+		}
 		gumbelSample = new Tensor(this.config.batchSize, this.config.generatorDim);
 		
 		// Initialize lists to store inputs and memories
@@ -137,42 +144,35 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		// Sample sequences and indexes
 		int[] sequences = sampling.sequence(config.batchSize);
 		int[] indexes = sampling.next(sequences, config.sequenceLength);
-
-		// These should be classified as correct by the discriminator
-		target.fill(0.85f);
 	
 		// Load minibatch of real data for the discriminator 
 		sequence = dataset.getBatchedSequence(sequence , sequences, indexes, config.sequenceLength);
 				
-		output = discriminator.forward(sequence.getInputs()).get(config.sequenceLength - 1);
-		float d_loss_positive = TensorOps.mean(criterion.loss(output, target));
-		Tensor gradOutput = criterion.grad(output, target);
+		outputs = discriminator.forward(sequence.getInputs());
+		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		List<Tensor> gradOutput = criterion.grad(outputs, targets);
 				
 		if(d_loss_positive > 0.6f) {
-			discriminator.backward(gradOutput);
-				
-			// Keep gradients to the parameters
-			discriminator.accGradParameters();	
+			discriminator.backward(gradOutput, true);
 		}		
 				
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
 		
 		// These should be classified as incorrect by discriminator
-		target.fill(0.15f);
+		for(int t = 0; t < config.sequenceLength; t++) {
+			targets.get(t).fill(0.15f);
+		}
 		
 		// Generate sequence of data
 		generateSequence();
 						
-		output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);
-		float d_loss_negative = TensorOps.mean(criterion.loss(output, target));
-		gradOutput = criterion.grad(output, target);
+		outputs = discriminator.forward(sequence.getTargets());
+		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		gradOutput = criterion.grad(outputs, targets);
 		
 		if(d_loss_negative > 0.6f) {
-			discriminator.backward(gradOutput);	
-				
-			// Keep gradients to the parameters
-			discriminator.accGradParameters();		
+			discriminator.backward(gradOutput, true);
 		}
 		
 		if(d_loss_positive > 0.6f || d_loss_negative > 0.6f) {
@@ -185,19 +185,21 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
 		
-		// This should be classified correct by discriminator to get the gradient improving the generator
-		target.fill(0.85f);
-					
-		output = discriminator.forward(sequence.getTargets()).get(config.sequenceLength - 1);			
-		float g_loss = TensorOps.mean(criterion.loss(output, target));
-		gradOutput = criterion.grad(output, target);
-		Tensor gradInput = discriminator.backward(gradOutput);
+		for(int t = 0; t < config.sequenceLength; t++) {
+			targets.get(t).fill(0.85f);
+		}
+		
+		outputs = discriminator.forward(sequence.getTargets());
+		float g_loss = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		gradOutput = criterion.grad(outputs, targets);
+		
+		List<Tensor> gradInput = discriminator.backward(gradOutput, false);
 		
 		//Differentiate gradients
-		ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
-		TensorOps.div(gradInput, gradInput, temperature);
+		ModuleOps.softmaxGradIn(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
+		TensorOps.div(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), temperature);
 				
-		gradInput = generator.backward(gradInput);
+		Tensor gradNext = generator.backward(gradInput.get(config.sequenceLength -1));
 					
 		// Keep gradients to the parameters
 		generator.accGradParameters();
@@ -210,11 +212,13 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			//Forward input
 			generator.forward(sequence.get(s).getInput());
 			
+			TensorOps.add(gradInput.get(s), gradInput.get(s), gradNext);
+			
 			//Differentiate gradients
-			ModuleOps.softmaxGradIn(gradInput, gradInput, inputs.get(s), sequence.get(s).getTarget());
-			TensorOps.div(gradInput, gradInput, temperature);
+			ModuleOps.softmaxGradIn(gradInput.get(s), gradInput.get(s), inputs.get(s), sequence.get(s).getTarget());
+			TensorOps.div(gradInput.get(s), gradInput.get(s), temperature);
 				
-			gradInput = generator.backward(gradInput);
+			gradNext = generator.backward(gradInput.get(s));
 
 			// Keep gradients to the parameters
 			generator.accGradParameters();			
@@ -282,9 +286,9 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		gumbelSample.rand();	
 		TensorOps.add(gumbelSample, gumbelSample, epsilon);
 		TensorOps.log(gumbelSample, gumbelSample);
-		TensorOps.mul(gumbelSample, gumbelSample, -1f);
+		TensorOps.sign(gumbelSample, gumbelSample);
 		TensorOps.add(gumbelSample, gumbelSample, epsilon);
 		TensorOps.log(gumbelSample, gumbelSample);
-		TensorOps.mul(gumbelSample, gumbelSample, -1f);
+		TensorOps.sign(gumbelSample, gumbelSample);
 	}
 }

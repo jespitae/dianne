@@ -20,42 +20,17 @@
  * Contributors:
  *     Tim Verbelen, Steven Bohez
  *******************************************************************************/
-package be.iminds.iot.dianne.rnn.learn.strategy.config;
+package be.iminds.iot.dianne.rnn.learn.sampling.config;
 
-import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory.CriterionConfig;
-import be.iminds.iot.dianne.nn.learn.processors.ProcessorFactory.ProcessorConfig;
-import be.iminds.iot.dianne.nn.learn.sampling.SamplingFactory.SamplingConfig;
-
-public class BPTTConfig {
+public class SequenceSamplerConfig {
 
 	/**
-	 * Batchsize to process inputs
+	 * Batch size to sample
 	 */
 	public int batchSize = 1;
 	
 	/**
-	 * Length of the sequence to feed into the network before backpropagating 
+	 * Length of the sequence to sample
 	 */
 	public int sequenceLength = 1;
-	
-	/**
-	 * The criterion to use to evaluate the error between output and target
-	 */
-	public CriterionConfig criterion = CriterionConfig.MSE;
-	
-	/**
-	 * The gradient optimization method to use
-	 *  * SGD - stochastic gradient descent (optionally with (nesterov) momentum and regularization parameters)
-	 *  * Adadelta
-	 *  * Adagrad
-	 *  * RMSprop
-	 */
-	public ProcessorConfig method = ProcessorConfig.SGD;
-	
-	/**
-	 * The sampling strategy to use to traverse the dataset
-	 *  * Random
-	 *  * Sequential
-	 */
-	public SamplingConfig sampling = SamplingConfig.UNIFORM;
 }
