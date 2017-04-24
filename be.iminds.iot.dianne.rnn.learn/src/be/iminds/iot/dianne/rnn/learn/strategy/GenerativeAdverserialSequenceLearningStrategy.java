@@ -150,7 +150,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		List<Tensor> gradOutput = criterion.grad(outputs, targets);
 				
-		if(d_loss_positive > 6f) {
+		if(d_loss_positive > 0.6f) {
 			discriminator.backward(gradOutput, true);
 		}		
 				
@@ -169,11 +169,11 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		gradOutput = criterion.grad(outputs, targets);
 		
-		if(d_loss_negative > 6f) {
+		if(d_loss_negative > 0.6f) {
 			discriminator.backward(gradOutput, true);
 		}
 		
-		if(d_loss_positive > 6f || d_loss_negative > 6f) {
+		if(d_loss_positive > 0.6f || d_loss_negative > 0.6f) {
 			// Run gradient processors
 			gradientProcessorD.calculateDelta(i);
 			
