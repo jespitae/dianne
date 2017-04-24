@@ -33,11 +33,9 @@ import be.iminds.iot.dianne.api.dataset.Dataset;
 import be.iminds.iot.dianne.api.dataset.Sequence;
 import be.iminds.iot.dianne.api.dataset.SequenceDataset;
 import be.iminds.iot.dianne.api.nn.NeuralNetwork;
-import be.iminds.iot.dianne.api.nn.learn.Criterion;
 import be.iminds.iot.dianne.api.nn.learn.GradientProcessor;
 import be.iminds.iot.dianne.api.nn.learn.LearnProgress;
 import be.iminds.iot.dianne.api.nn.learn.LearningStrategy;
-import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory;
 import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory.CriterionConfig;
 import be.iminds.iot.dianne.nn.learn.processors.ProcessorFactory;
 import be.iminds.iot.dianne.nn.learn.strategy.GenerativeAdverserialLearnProgress;
@@ -152,7 +150,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		List<Tensor> gradOutput = criterion.grad(outputs, targets);
 				
-		if(d_loss_positive > 0.6f) {
+		if(d_loss_positive > 6f) {
 			discriminator.backward(gradOutput, true);
 		}		
 				
@@ -171,11 +169,12 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		gradOutput = criterion.grad(outputs, targets);
 		
-		if(d_loss_negative > 0.6f) {
+		if(d_loss_negative > 6f) {
 			discriminator.backward(gradOutput, true);
 		}
 		
-		if(d_loss_positive > 0.6f || d_loss_negative > 0.6f) {
+		if(d_loss_positive > 6f || d_loss_negative > 6f) {
+			//System.out.println(d_loss_positive + " " + d_loss_negative);
 			// Run gradient processors
 			gradientProcessorD.calculateDelta(i);
 			
