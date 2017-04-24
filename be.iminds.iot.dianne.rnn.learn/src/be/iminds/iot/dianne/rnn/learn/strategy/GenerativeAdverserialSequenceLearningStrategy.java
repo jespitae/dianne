@@ -174,7 +174,6 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		}
 		
 		if(d_loss_positive > 6f || d_loss_negative > 6f) {
-			//System.out.println(d_loss_positive + " " + d_loss_negative);
 			// Run gradient processors
 			gradientProcessorD.calculateDelta(i);
 			
@@ -197,9 +196,9 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		//Differentiate gradients
 		ModuleOps.softmaxGradIn(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
 		TensorOps.div(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), temperature);
-				
+		
 		Tensor gradNext = generator.backward(gradInput.get(config.sequenceLength -1));
-					
+		
 		// Keep gradients to the parameters
 		generator.accGradParameters();
 							
