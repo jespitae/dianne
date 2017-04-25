@@ -164,7 +164,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		
 		// Generate sequence of data
 		generateSequence();
-						
+				
 		outputs = discriminator.forward(sequence.getTargets());
 		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
 		gradOutput = criterion.grad(outputs, targets);
@@ -192,6 +192,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		gradOutput = criterion.grad(outputs, targets);
 		
 		List<Tensor> gradInput = discriminator.backward(gradOutput, false);
+		
+		//System.out.println(gradInput.get(config.sequenceLength - 1).get(0, 0) + " " + gradInput.get(config.sequenceLength - 1).get(0, 1) + " " + gradInput.get(config.sequenceLength - 1).get(0, 2) + " " + gradInput.get(config.sequenceLength - 1).get(0, 3) + " " + gradInput.get(config.sequenceLength - 1).get(0, 4));
 		
 		//Differentiate gradients
 		ModuleOps.softmaxGradIn(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
@@ -221,6 +223,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			// Keep gradients to the parameters
 			generator.accGradParameters();			
 		}
+		
+		//System.out.println(gradInput.get(0).get(0, 0) + " " + gradInput.get(0).get(0, 1) + " " + gradInput.get(0).get(0, 2) + " " + gradInput.get(0).get(0, 3) + " " + gradInput.get(0).get(0, 4));
 				
 		// Run gradient processors
 		gradientProcessorG.calculateDelta(i);
