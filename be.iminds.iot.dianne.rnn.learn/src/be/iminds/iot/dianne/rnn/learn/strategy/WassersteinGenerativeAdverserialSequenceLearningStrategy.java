@@ -33,17 +33,12 @@ import be.iminds.iot.dianne.api.dataset.Dataset;
 import be.iminds.iot.dianne.api.dataset.Sequence;
 import be.iminds.iot.dianne.api.dataset.SequenceDataset;
 import be.iminds.iot.dianne.api.nn.NeuralNetwork;
-import be.iminds.iot.dianne.api.nn.learn.Criterion;
 import be.iminds.iot.dianne.api.nn.learn.GradientProcessor;
 import be.iminds.iot.dianne.api.nn.learn.LearnProgress;
 import be.iminds.iot.dianne.api.nn.learn.LearningStrategy;
-import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory;
-import be.iminds.iot.dianne.nn.learn.criterion.CriterionFactory.CriterionConfig;
 import be.iminds.iot.dianne.nn.learn.processors.ProcessorFactory;
 import be.iminds.iot.dianne.nn.learn.strategy.GenerativeAdverserialLearnProgress;
 import be.iminds.iot.dianne.nn.util.DianneConfigHandler;
-import be.iminds.iot.dianne.rnn.learn.criterion.SequenceCriterion;
-import be.iminds.iot.dianne.rnn.learn.criterion.SequenceCriterionFactory;
 import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingFactory;
 import be.iminds.iot.dianne.rnn.learn.sampling.SequenceSamplingStrategy;
 import be.iminds.iot.dianne.rnn.learn.strategy.config.GenerativeAdverserialSequenceConfig;
@@ -71,8 +66,6 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 	
 	protected GradientProcessor gradientProcessorG;
 	protected GradientProcessor gradientProcessorD;
-
-	protected SequenceCriterion criterion;
 	
 	protected SequenceSamplingStrategy sampling;
 	
@@ -81,9 +74,10 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 	
 	protected Sequence<Batch> sequence = null;
 		
-	protected List<Tensor> targets;
 	protected List<Tensor> outputs;
 	protected Tensor gumbelSample;
+	protected List<Tensor> gradOutputReal;
+	protected List<Tensor> gradOutputFake;
 	
 	protected float temperature;
 	protected float annealStep;
@@ -94,7 +88,7 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 	public void setup(Map<String, String> config, Dataset dataset, NeuralNetwork... nns) throws Exception {
 		this.dataset = (SequenceDataset) dataset;
 		this.temperature = 5;
-		this.n = 5;
+		this.n = 6;
 		this.epsilon = (float) (1f * Math.pow(10,-20));
 		this.annealStep = 0.0004f;
 
@@ -108,17 +102,21 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 		this.config = DianneConfigHandler.getConfig(config, GenerativeAdverserialSequenceConfig.class);
 			
 		sampling = SequenceSamplingFactory.createSamplingStrategy(this.config.sampling, this.dataset, config);
-		criterion = SequenceCriterionFactory.createCriterion(CriterionConfig.BCE, config);
 		gradientProcessorG = ProcessorFactory.createGradientProcessor(this.config.method, generator, config);
 		gradientProcessorD = ProcessorFactory.createGradientProcessor(this.config.method, discriminator, config);
-		
-		targets = new ArrayList<>();
-		Tensor target = new Tensor(this.config.batchSize, 1);
-		target.fill(0.85f);
-		for(int t=0; t < this.config.sequenceLength; t++) {
-			targets.add(target);
-		}
+				
 		gumbelSample = new Tensor(this.config.batchSize, this.config.generatorDim);
+	
+		gradOutputReal = new ArrayList<>();
+		gradOutputFake = new ArrayList<>();
+		Tensor gradReal = new Tensor(this.config.batchSize, 1);
+		gradReal.fill(-1f/this.config.batchSize);
+		Tensor gradFake = new Tensor(this.config.batchSize, 1);
+		gradFake.fill(1f/this.config.batchSize);
+		for(int s = 0; s < this.config.sequenceLength; s++) {
+			gradOutputReal.add(gradReal);			
+			gradOutputFake.add(gradFake);
+		}
 		
 		// Initialize lists to store inputs and memories
 		memories = new HashMap<>();
@@ -150,28 +148,30 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 		// Load minibatch of real data for the discriminator 
 		sequence = dataset.getBatchedSequence(sequence , sequences, indexes, config.sequenceLength);
 				
-		outputs = discriminator.forward(sequence.getInputs());
-		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
-		List<Tensor> gradOutput = criterion.grad(outputs, targets);
+		outputs = discriminator.forward(sequence.getInputs());	
+		discriminator.backward(gradOutputReal, true);
 				
-		discriminator.backward(gradOutput, true);
-				
+		float d_loss = 0;
+		for(int s = 0; s < config.sequenceLength; s++) {
+			d_loss += TensorOps.mean(outputs.get(s));
+		}
+		
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
-		
-		// These should be classified as incorrect by discriminator
-		for(int t = 0; t < config.sequenceLength; t++) {
-			targets.get(t).fill(0.15f);
-		}
 		
 		// Generate sequence of data
 		generateSequence();
 						
 		outputs = discriminator.forward(sequence.getTargets());
-		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
-		gradOutput = criterion.grad(outputs, targets);
-
-		discriminator.backward(gradOutput, true);
+		discriminator.backward(gradOutputFake, true);
+		
+		float g_loss = 0;
+		for(int s = 0; s < config.sequenceLength; s++) {
+			d_loss -= TensorOps.mean(outputs.get(s));
+			g_loss -= TensorOps.mean(outputs.get(s));
+		}
+		d_loss /= config.sequenceLength;
+		g_loss /= config.sequenceLength;
 		
 		// Run gradient processors
 		gradientProcessorD.calculateDelta(i);
@@ -183,16 +183,13 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 			TensorOps.clamp(params, params, -0.01f, 0.01f);
 		}
 
-		float g_loss = 0;
-		
-		if(n == 1) {
-			g_loss = trainGenerator(i);
+		if(n == 1) {	
+			trainGenerator(i);
 			n = 5;
 		} else {
 			n--;
-		}		
-	
-		return new GenerativeAdverserialLearnProgress(i, d_loss_positive, d_loss_negative, g_loss);
+		}
+		return new GenerativeAdverserialLearnProgress(i, d_loss, 0, g_loss);
 	}
 
 	private void generateSequence() {		
@@ -254,21 +251,13 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 		TensorOps.mul(gumbelSample, gumbelSample, -1f);
 	}
 	
-	private float trainGenerator(long i) {
+	private void trainGenerator(long i) {
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
-		
-		// This should be classified correct by discriminator to get the gradient improving the generator
-		for(int t = 0; t < config.sequenceLength; t++) {
-			targets.get(t).fill(0.85f);
-		}
+							
+		outputs = discriminator.forward(sequence.getTargets());		
+		List<Tensor> gradInput = discriminator.backward(gradOutputReal, false);
 					
-		outputs = discriminator.forward(sequence.getTargets());
-		float g_loss = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
-		List<Tensor> gradOutput = criterion.grad(outputs, targets);
-		
-		List<Tensor> gradInput = discriminator.backward(gradOutput, false);
-			
 		//Differentiate gradients
 		ModuleOps.softmaxGradIn(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
 		TensorOps.div(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), temperature);
@@ -303,7 +292,5 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 		
 		// Update parameters
 		generator.updateParameters();
-		
-		return g_loss;
 	}
 }

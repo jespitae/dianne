@@ -352,7 +352,7 @@ public class DianneGenerationCommands {
 			o = m;
 		}
 
-		return labels[o].charAt(0);
+		return labels[m].charAt(0);
 	}	
 
 	@Reference
