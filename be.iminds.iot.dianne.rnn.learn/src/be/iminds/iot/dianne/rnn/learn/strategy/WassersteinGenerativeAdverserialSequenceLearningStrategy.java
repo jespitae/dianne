@@ -153,7 +153,7 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 				
 		float d_loss = 0;
 		for(int s = 0; s < config.sequenceLength; s++) {
-			d_loss += TensorOps.mean(outputs.get(s));
+			d_loss -= TensorOps.mean(outputs.get(s));
 		}
 		
 		// Reset memory discriminator
@@ -167,7 +167,7 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 		
 		float g_loss = 0;
 		for(int s = 0; s < config.sequenceLength; s++) {
-			d_loss -= TensorOps.mean(outputs.get(s));
+			d_loss += TensorOps.mean(outputs.get(s));
 			g_loss -= TensorOps.mean(outputs.get(s));
 		}
 		d_loss /= config.sequenceLength;
