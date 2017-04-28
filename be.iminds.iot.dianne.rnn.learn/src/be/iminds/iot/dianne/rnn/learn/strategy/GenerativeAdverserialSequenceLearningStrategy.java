@@ -79,7 +79,8 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	
 	protected Sequence<Batch> sequence = null;
 		
-	protected List<Tensor> targets;
+	protected List<Tensor> targetsReal;
+	protected List<Tensor> targetsFake;
 	protected List<Tensor> outputs;
 	protected Tensor gumbelSample;
 	
@@ -108,11 +109,15 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		gradientProcessorG = ProcessorFactory.createGradientProcessor(this.config.method, generator, config);
 		gradientProcessorD = ProcessorFactory.createGradientProcessor(this.config.method, discriminator, config);
 		
-		targets = new ArrayList<>();
-		Tensor target = new Tensor(this.config.batchSize, 1);
-		target.fill(0.85f);
+		targetsReal = new ArrayList<>();
+		targetsFake = new ArrayList<>();
+		Tensor targetReal = new Tensor(this.config.batchSize, 1);
+		targetReal.fill(0.85f);
+		Tensor targetFake = new Tensor(this.config.batchSize, 1);
+		targetFake.fill(0.15f);
 		for(int t=0; t < this.config.sequenceLength; t++) {
-			targets.add(target);
+			targetsReal.add(targetReal);
+			targetsFake.add(targetFake);
 		}
 		gumbelSample = new Tensor(this.config.batchSize, this.config.generatorDim);
 		
@@ -147,33 +152,28 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		sequence = dataset.getBatchedSequence(sequence , sequences, indexes, config.sequenceLength);
 				
 		outputs = discriminator.forward(sequence.getInputs());
-		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
-		List<Tensor> gradOutput = criterion.grad(outputs, targets);
+		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targetsReal).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		List<Tensor> gradOutput = criterion.grad(outputs, targetsReal);
 				
-		if(d_loss_positive > 6f) {
+		if(d_loss_positive > 0.6f) {
 			discriminator.backward(gradOutput, true);
 		}		
 				
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
-		
-		// These should be classified as incorrect by discriminator
-		for(int t = 0; t < config.sequenceLength; t++) {
-			targets.get(t).fill(0.15f);
-		}
-		
+				
 		// Generate sequence of data
 		generateSequence();
-						
+				
 		outputs = discriminator.forward(sequence.getTargets());
-		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
-		gradOutput = criterion.grad(outputs, targets);
+		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targetsFake).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		gradOutput = criterion.grad(outputs, targetsFake);
 		
-		if(d_loss_negative > 6f) {
+		if(d_loss_negative > 0.6f) {
 			discriminator.backward(gradOutput, true);
 		}
 		
-		if(d_loss_positive > 6f || d_loss_negative > 6f) {
+		if(d_loss_positive > 0.6f || d_loss_negative > 0.6f) {
 			// Run gradient processors
 			gradientProcessorD.calculateDelta(i);
 			
@@ -182,14 +182,10 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
-		
-		for(int t = 0; t < config.sequenceLength; t++) {
-			targets.get(t).fill(0.85f);
-		}
-		
+				
 		outputs = discriminator.forward(sequence.getTargets());
-		float g_loss = TensorOps.mean(criterion.loss(outputs, targets).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
-		gradOutput = criterion.grad(outputs, targets);
+		float g_loss = TensorOps.mean(criterion.loss(outputs, targetsReal).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		gradOutput = criterion.grad(outputs, targetsReal);
 		
 		List<Tensor> gradInput = discriminator.backward(gradOutput, false);
 		
@@ -221,7 +217,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 			// Keep gradients to the parameters
 			generator.accGradParameters();			
 		}
-				
+			
 		// Run gradient processors
 		gradientProcessorG.calculateDelta(i);
 		
