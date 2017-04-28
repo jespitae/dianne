@@ -152,7 +152,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		sequence = dataset.getBatchedSequence(sequence , sequences, indexes, config.sequenceLength);
 				
 		outputs = discriminator.forward(sequence.getInputs());
-		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targetsReal).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		float d_loss_positive = TensorOps.mean(criterion.loss(outputs, targetsReal).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/config.sequenceLength;
 		List<Tensor> gradOutput = criterion.grad(outputs, targetsReal);
 				
 		if(d_loss_positive > 0.6f) {
@@ -166,7 +166,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		generateSequence();
 				
 		outputs = discriminator.forward(sequence.getTargets());
-		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targetsFake).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		float d_loss_negative = TensorOps.mean(criterion.loss(outputs, targetsFake).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/config.sequenceLength;
 		gradOutput = criterion.grad(outputs, targetsFake);
 		
 		if(d_loss_negative > 0.6f) {
@@ -184,7 +184,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 		discriminator.resetMemory(config.batchSize);
 				
 		outputs = discriminator.forward(sequence.getTargets());
-		float g_loss = TensorOps.mean(criterion.loss(outputs, targetsReal).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get());
+		float g_loss = TensorOps.mean(criterion.loss(outputs, targetsReal).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/config.sequenceLength;
 		gradOutput = criterion.grad(outputs, targetsReal);
 		
 		List<Tensor> gradInput = discriminator.backward(gradOutput, false);
