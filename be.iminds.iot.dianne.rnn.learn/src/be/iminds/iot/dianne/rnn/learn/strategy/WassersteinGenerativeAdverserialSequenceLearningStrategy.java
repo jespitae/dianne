@@ -195,13 +195,13 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 			if(memories.get(id).isEmpty()) {
 				memories.get(id).add(new Tensor(memory.dims()));				
 			}
-			memories.get(id).get(0).set(memory.get());
+			memory.copyInto(memories.get(id).get(0));
 		}		
 		
 		Batch start = sequence.get(0); 
 		start.getInput().randn();
 		Tensor out = generator.forward(start.getInput());
-		start.getTarget().set(gumbelSoftmax(out, 0).get());
+		gumbelSoftmax(out, 0).copyInto(start.getTarget());
 		
 		for(int s = 1; s < config.sequenceLength; s++) {
 			// Save memory of network
@@ -210,13 +210,13 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 				if(memories.get(id).size() <= s) {
 					memories.get(id).add(new Tensor(memory.dims()));
 				}
-				memories.get(id).get(s).set(memory.get());
+				memory.copyInto(memories.get(id).get(s));
 			}
 			
 			Batch batch = sequence.get(s);
-			batch.getInput().set(sequence.get(s - 1).getTarget().get());
+			sequence.get(s - 1).getTarget().copyInto(batch.getInput());
 			out = generator.forward(batch.getInput());				
-			batch.getTarget().set(gumbelSoftmax(out, s).get());
+			gumbelSoftmax(out, s).copyInto(batch.getTarget());
 		}
 	}
 		
@@ -230,7 +230,7 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 		if(inputs.size() <= s) {
 			inputs.add(new Tensor(tensor.dims()));
 		}
-		inputs.get(s).set(tensor.get());
+		tensor.copyInto(inputs.get(s));
 		
 		ModuleOps.softmax(tensor, tensor);
 		return tensor;
@@ -253,32 +253,24 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 							
 		outputs = discriminator.forward(sequence.getTargets());		
 		List<Tensor> gradInput = discriminator.backward(gradOutputReal, false);
-					
-		//Differentiate gradients
-		ModuleOps.softmaxGradIn(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), inputs.get(config.sequenceLength - 1), sequence.get(config.sequenceLength - 1).getTarget());
-		TensorOps.div(gradInput.get(config.sequenceLength -1), gradInput.get(config.sequenceLength -1), temperature);
-					
-		Tensor gradNext = generator.backward(gradInput.get(config.sequenceLength -1));
-					
-		// Keep gradients to the parameters
-		generator.accGradParameters();
 							
-		for(int s = config.sequenceLength - 2; s >= 0; s--) {
+		for(int s = config.sequenceLength - 1; s >= 0; s--) {
 			//Set memory
 			for(UUID id : memories.keySet()) {
 				generator.getMemory(id).setMemory(memories.get(id).get(s));
 			}
 			//Forward input
 			generator.forward(sequence.get(s).getInput());
-			
-			TensorOps.add(gradInput.get(s), gradInput.get(s), gradNext);
-			
+						
 			//Differentiate gradients
 			ModuleOps.softmaxGradIn(gradInput.get(s), gradInput.get(s), inputs.get(s), sequence.get(s).getTarget());
 			TensorOps.div(gradInput.get(s), gradInput.get(s), temperature);
 				
-			gradNext = generator.backward(gradInput.get(s));
-
+			Tensor gradNext = generator.backward(gradInput.get(s));
+			if(s > 0) {
+				TensorOps.add(gradInput.get(s - 1), gradInput.get(s - 1), gradNext);				
+			}
+			
 			// Keep gradients to the parameters
 			generator.accGradParameters();			
 		}
