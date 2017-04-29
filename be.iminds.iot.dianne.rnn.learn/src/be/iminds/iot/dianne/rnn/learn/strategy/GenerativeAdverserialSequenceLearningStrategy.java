@@ -182,7 +182,7 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 
 		// Reset memory discriminator
 		discriminator.resetMemory(config.batchSize);
-				
+						
 		outputs = discriminator.forward(sequence.getTargets());
 		float g_loss = TensorOps.mean(criterion.loss(outputs, targetsReal).stream().reduce((t1,t2) -> TensorOps.add(t1, t1, t2)).get())/config.sequenceLength;
 		gradOutput = criterion.grad(outputs, targetsReal);
@@ -263,7 +263,6 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	private Tensor gumbelSoftmax(Tensor tensor, int s) {
 		// Create new gumbel sample
 		gumbelSample();
-		
 		TensorOps.add(tensor, tensor, gumbelSample);
 		TensorOps.div(tensor, tensor, temperature);
 		if(inputs.size() <= s) {
@@ -277,12 +276,12 @@ public class GenerativeAdverserialSequenceLearningStrategy implements LearningSt
 	
 	//Calculate gumbel sample
 	private void gumbelSample() {
-		gumbelSample.rand();	
+		gumbelSample.rand();
 		TensorOps.add(gumbelSample, gumbelSample, epsilon);
 		TensorOps.log(gumbelSample, gumbelSample);
-		TensorOps.sign(gumbelSample, gumbelSample);
+		TensorOps.mul(gumbelSample, gumbelSample, -1f);
 		TensorOps.add(gumbelSample, gumbelSample, epsilon);
 		TensorOps.log(gumbelSample, gumbelSample);
-		TensorOps.sign(gumbelSample, gumbelSample);
+		TensorOps.mul(gumbelSample, gumbelSample, -1f);
 	}
 }

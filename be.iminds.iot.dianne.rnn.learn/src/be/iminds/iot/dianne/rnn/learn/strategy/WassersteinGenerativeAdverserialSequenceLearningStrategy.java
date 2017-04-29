@@ -182,13 +182,9 @@ public class WassersteinGenerativeAdverserialSequenceLearningStrategy implements
 			Tensor params = discriminator.getParameters().get(id);
 			TensorOps.clamp(params, params, -0.01f, 0.01f);
 		}
-
-		if(n == 1) {	
-			trainGenerator(i);
-			n = 5;
-		} else {
-			n--;
-		}
+	
+		trainGenerator(i);
+		
 		return new GenerativeAdverserialLearnProgress(i, d_loss, 0, g_loss);
 	}
 
